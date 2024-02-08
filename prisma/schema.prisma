@@ -1,0 +1,132 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Restaurant {
+  id            String  @id @default(uuid())
+  name          String
+  currency_code String  @default("USD")
+  purchase_tax  Float   @default(18.00)
+  sales_tax     Float   @default(18.00)
+  status        Boolean @default(true)
+
+  supplies Supply[]
+  subproducts Subproduct[]
+  products Product[]
+
+  @@map("restaurants")
+}
+
+model Supply {
+  id                 String  @id @default(uuid())
+  name               String
+  price              Float   @default(0.00)
+  um                 String
+  waste              Float   @default(0)
+  taxable            Boolean @default(true)
+  status             Boolean @default(true)
+  has_equivalence    Boolean @default(false)
+  equivalence_um     String?
+  equivalence_amount Float?
+
+  restaurant_id String
+  restaurant Restaurant @relation(fields: [restaurant_id], references: [id])
+
+  subproducts SupplyOnSubproduct[]
+  products    SupplyOnProduct[]
+
+  @@map("supplies")
+}
+
+model Subproduct {
+  id     String  @id @default(uuid())
+  name   String
+  um     String
+  yield  Float
+  status Boolean @default(true)
+
+  restaurant_id String
+  restaurant Restaurant @relation(fields: [restaurant_id], references: [id])
+
+  supplies               SupplyOnSubproduct[]
+  base_subproducts       SubproductOnSubproduct[] @relation("base")
+  ingredient_subproducts SubproductOnSubproduct[] @relation("ingredient")
+  products               SubproductOnProduct[]
+
+  @@map("subproducts")
+}
+
+model Product {
+  id     String  @id @default(uuid())
+  name   String
+  price  Float
+  status Boolean @default(true)
+
+  restaurant_id String
+  restaurant Restaurant @relation(fields: [restaurant_id], references: [id])
+
+  supplies    SupplyOnProduct[]
+  subproducts SubproductOnProduct[]
+
+  @@map("products")
+}
+
+model SupplyOnSubproduct {
+  amount Float
+
+  subproduct_id String
+  subproduct    Subproduct @relation(fields: [subproduct_id], references: [id])
+
+  supply_id String
+  supply    Supply @relation(fields: [supply_id], references: [id])
+
+  @@id([subproduct_id, supply_id])
+  @@map("supplies_on_subproducts")
+}
+
+model SubproductOnSubproduct {
+  amount Float
+
+  base_subproduct_id String
+  base_subproduct    Subproduct @relation("base", fields: [base_subproduct_id], references: [id])
+
+  ingredient_subproduct_id String
+  ingredient_subproduct    Subproduct @relation("ingredient", fields: [ingredient_subproduct_id], references: [id])
+
+  @@id([base_subproduct_id, ingredient_subproduct_id])
+  @@map("subproducts_on_subproducts")
+}
+
+model SupplyOnProduct {
+  amount Float
+
+  supply_id String
+  supply    Supply @relation(fields: [supply_id], references: [id])
+
+  product_id String
+  product    Product @relation(fields: [product_id], references: [id])
+
+  @@id([supply_id, product_id])
+  @@map("supplies_on_products")
+}
+
+model SubproductOnProduct {
+  amount Float
+
+  subproduct_id String
+  subproduct    Subproduct @relation(fields: [subproduct_id], references: [id])
+
+  product_id String
+  product    Product @relation(fields: [product_id], references: [id])
+
+  @@id([subproduct_id, product_id])
+  @@map("subproducts_on_products")
+}
