@@ -1,38 +1,5 @@
 import { prisma } from "../libs/prisma";
-import { FullRecipe, Recipe } from "../types";
-
-export const buildProductRecipe = async (
-  product_id: string
-): Promise<Recipe> => {
-  const supplies = await prisma.supplyOnProduct.findMany({
-    where: {
-      product_id,
-    },
-    include: {
-      supply: true,
-    },
-  });
-
-  const subproducts = await prisma.subproductOnProduct.findMany({
-    where: {
-      product_id,
-    },
-    include: {
-      subproduct: true,
-    },
-  });
-
-  return {
-    supplies: supplies.map((supply) => ({
-      ...supply.supply,
-      amount: supply.amount,
-    })),
-    subproducts: subproducts.map((subproduct) => ({
-      ...subproduct.subproduct,
-      amount: subproduct.amount,
-    })),
-  };
-};
+import { Recipe } from "../types";
 
 export const buildSubproductRecipe = async (
   subproduct_id: string
@@ -55,40 +22,7 @@ export const buildSubproductRecipe = async (
     },
   });
 
-  return {
-    supplies: supplies.map((supply) => ({
-      ...supply.supply,
-      amount: supply.amount,
-    })),
-    subproducts: subproducts.map((subproduct) => ({
-      ...subproduct.ingredient_subproduct,
-      amount: subproduct.amount,
-    })),
-  };
-};
-
-export const buildFullSubproductRecipe = async (
-  subproduct_id: string
-): Promise<FullRecipe> => {
-  const supplies = await prisma.supplyOnSubproduct.findMany({
-    where: {
-      subproduct_id,
-    },
-    include: {
-      supply: true,
-    },
-  });
-
-  const subproducts = await prisma.subproductOnSubproduct.findMany({
-    where: {
-      base_subproduct_id: subproduct_id,
-    },
-    include: {
-      ingredient_subproduct: true,
-    },
-  });
-
-  let full_recipe: FullRecipe = {
+  let full_recipe: Recipe = {
     supplies: supplies.map((supply) => ({
       ...supply.supply,
       amount: supply.amount,
@@ -97,7 +31,7 @@ export const buildFullSubproductRecipe = async (
   };
 
   for await (const subproduct of subproducts) {
-    const recipe: FullRecipe = await buildFullSubproductRecipe(
+    const recipe: Recipe = await buildSubproductRecipe(
       subproduct.base_subproduct_id
     );
     const clean_subproduct = {
@@ -111,9 +45,9 @@ export const buildFullSubproductRecipe = async (
   return full_recipe;
 };
 
-export const buildFullProductRecipe = async (
+export const buildProductRecipe = async (
   product_id: string
-): Promise<FullRecipe> => {
+): Promise<Recipe> => {
   const supplies = await prisma.supplyOnProduct.findMany({
     where: {
       product_id,
@@ -132,7 +66,7 @@ export const buildFullProductRecipe = async (
     },
   });
 
-  let full_recipe: FullRecipe = {
+  let full_recipe: Recipe = {
     supplies: supplies.map((supply) => ({
       ...supply.supply,
       amount: supply.amount,
@@ -141,7 +75,7 @@ export const buildFullProductRecipe = async (
   };
 
   for await (const subproduct of subproducts) {
-    const recipe: FullRecipe = await buildFullSubproductRecipe(
+    const recipe: Recipe = await buildSubproductRecipe(
       subproduct.subproduct_id
     );
     const clean_subproduct = {

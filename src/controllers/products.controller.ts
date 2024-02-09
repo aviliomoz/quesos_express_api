@@ -1,9 +1,6 @@
 import { Request, Response } from "express";
 import { prisma } from "../libs/prisma";
-import {
-  buildFullProductRecipe,
-  buildProductRecipe,
-} from "../functions/recipes";
+import { buildProductRecipe } from "../functions/recipes";
 
 export const getProducts = async (req: Request, res: Response) => {
   const restaurant_id = "a3b40133-d377-43ec-9bc7-90209aff3418";
@@ -30,14 +27,6 @@ export const getProductRecipe = async (req: Request, res: Response) => {
   const { product_id } = req.params;
 
   const recipe = await buildProductRecipe(product_id);
-
-  res.json(recipe);
-};
-
-export const getFullProductRecipe = async (req: Request, res: Response) => {
-  const { product_id } = req.params;
-
-  const recipe = await buildFullProductRecipe(product_id);
 
   res.json(recipe);
 };

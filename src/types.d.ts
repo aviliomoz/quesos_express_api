@@ -4,20 +4,12 @@ interface SupplyWithAmount extends Supply {
   amount: number;
 }
 
-interface SubproductWithAmount extends Subproduct {
+interface SubproductWithAmountAndRecipe extends Subproduct {
   amount: number;
-}
-
-interface SubproductWithAmountAndRecipe extends SubproductWithAmount {
-  recipe: FullRecipe;
+  recipe: Recipe;
 }
 
 interface Recipe {
-  supplies: SupplyWithAmount[];
-  subproducts: SubproductWithAmount[];
-}
-
-interface FullRecipe {
   supplies: SupplyWithAmount[];
   subproducts: SubproductWithAmountAndRecipe[];
 }
