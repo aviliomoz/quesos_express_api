@@ -20,13 +20,8 @@ export const getProductById = async (req: Request, res: Response) => {
     where: { id: product_id },
   });
 
-  res.json(product);
-};
-
-export const getProductRecipe = async (req: Request, res: Response) => {
-  const { product_id } = req.params;
-
-  const recipe = await buildProductRecipe(product_id);
-
-  res.json(recipe);
+  if (product) {
+    const recipe = await buildProductRecipe(product.id);
+    res.json({ ...product, recipe });
+  }
 };

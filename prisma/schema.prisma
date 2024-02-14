@@ -10,6 +10,17 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model User {
+  id       String @id @default(uuid())
+  name     String
+  email    String @unique
+  password String
+
+  teams Teams[]
+
+  @@map("users")
+}
+
 model Restaurant {
   id            String  @id @default(uuid())
   name          String
@@ -18,11 +29,23 @@ model Restaurant {
   sales_tax     Float   @default(18.00)
   status        Boolean @default(true)
 
-  supplies Supply[]
+  supplies    Supply[]
   subproducts Subproduct[]
-  products Product[]
+  products    Product[]
+  teams       Teams[]
 
   @@map("restaurants")
+}
+
+model Teams {
+  user_id String
+  user    User   @relation(fields: [user_id], references: [id])
+
+  restaurant_id String
+  restaurant    Restaurant @relation(fields: [restaurant_id], references: [id])
+
+  @@id([user_id, restaurant_id])
+  @@map("teams")
 }
 
 model Supply {
@@ -38,7 +61,7 @@ model Supply {
   equivalence_amount Float?
 
   restaurant_id String
-  restaurant Restaurant @relation(fields: [restaurant_id], references: [id])
+  restaurant    Restaurant @relation(fields: [restaurant_id], references: [id])
 
   subproducts SupplyOnSubproduct[]
   products    SupplyOnProduct[]
@@ -54,7 +77,7 @@ model Subproduct {
   status Boolean @default(true)
 
   restaurant_id String
-  restaurant Restaurant @relation(fields: [restaurant_id], references: [id])
+  restaurant    Restaurant @relation(fields: [restaurant_id], references: [id])
 
   supplies               SupplyOnSubproduct[]
   base_subproducts       SubproductOnSubproduct[] @relation("base")
@@ -71,7 +94,7 @@ model Product {
   status Boolean @default(true)
 
   restaurant_id String
-  restaurant Restaurant @relation(fields: [restaurant_id], references: [id])
+  restaurant    Restaurant @relation(fields: [restaurant_id], references: [id])
 
   supplies    SupplyOnProduct[]
   subproducts SubproductOnProduct[]
