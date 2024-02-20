@@ -26,6 +26,7 @@ export const buildSubproductRecipe = async (
     supplies: supplies.map((supply) => ({
       ...supply.supply,
       amount: supply.amount,
+      use_equivalence: supply.use_equivalence && supply.supply.has_equivalence,
     })),
     subproducts: [],
   };
@@ -70,6 +71,7 @@ export const buildProductRecipe = async (
     supplies: supplies.map((supply) => ({
       ...supply.supply,
       amount: supply.amount,
+      use_equivalence: supply.use_equivalence && supply.supply.has_equivalence,
     })),
     subproducts: [],
   };

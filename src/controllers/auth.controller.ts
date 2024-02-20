@@ -69,7 +69,8 @@ export const login = async (req: Request, res: Response) => {
 };
 
 export const refresh = async (req: Request, res: Response) => {
-  const session = req.cookies.session;
+  const session =
+    req.headers.authorization && req.headers.authorization.split(" ")[1];
 
   if (!session) return res.json({ message: "Token not found" });
 

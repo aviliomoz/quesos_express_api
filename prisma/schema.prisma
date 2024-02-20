@@ -103,7 +103,8 @@ model Product {
 }
 
 model SupplyOnSubproduct {
-  amount Float
+  amount          Float
+  use_equivalence Boolean @default(false)
 
   subproduct_id String
   subproduct    Subproduct @relation(fields: [subproduct_id], references: [id])
@@ -129,7 +130,8 @@ model SubproductOnSubproduct {
 }
 
 model SupplyOnProduct {
-  amount Float
+  amount          Float
+  use_equivalence Boolean @default(false)
 
   supply_id String
   supply    Supply @relation(fields: [supply_id], references: [id])

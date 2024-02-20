@@ -1,7 +1,9 @@
-import { Subproduct, Supply } from "@prisma/client";
+import { Product, Subproduct, Supply } from "@prisma/client";
+import type { Request } from "express";
 
-interface SupplyWithAmount extends Supply {
+interface SupplyWithAmountAndEquivalence extends Supply {
   amount: number;
+  use_equivalence: boolean;
 }
 
 interface SubproductWithAmountAndRecipe extends Subproduct {
@@ -10,6 +12,15 @@ interface SubproductWithAmountAndRecipe extends Subproduct {
 }
 
 interface Recipe {
-  supplies: SupplyWithAmount[];
+  supplies: SupplyWithAmountAndEquivalence[];
   subproducts: SubproductWithAmountAndRecipe[];
 }
+
+interface ProductWithRecipe extends Product {
+  recipe: Recipe;
+}
+
+interface IRequest extends Request {
+  user_id: string
+}
+
