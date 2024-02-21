@@ -16,7 +16,7 @@ model User {
   email    String @unique
   password String
 
-  teams Teams[]
+  teams Team[]
 
   @@map("users")
 }
@@ -29,15 +29,22 @@ model Restaurant {
   sales_tax     Float   @default(18.00)
   status        Boolean @default(true)
 
-  supplies    Supply[]
-  subproducts Subproduct[]
-  products    Product[]
-  teams       Teams[]
+  teams                  Team[]
+  areas                  Area[]
+  supplies               Supply[]
+  supplies_categories    SupplyCategory[]
+  subproducts            Subproduct[]
+  subproducts_categories SubproductCategory[]
+  products               Product[]
+  products_categories    ProductCategory[]
+  combos                 Combo[]
+  combos_categories      ComboCategory[]
+  warehouses             Warehouse[]
 
   @@map("restaurants")
 }
 
-model Teams {
+model Team {
   user_id String
   user    User   @relation(fields: [user_id], references: [id])
 
@@ -46,6 +53,30 @@ model Teams {
 
   @@id([user_id, restaurant_id])
   @@map("teams")
+}
+
+model Area {
+  id     String  @id @default(uuid())
+  name   String
+  status Boolean @default(true)
+
+  restaurant_id String
+  restaurant    Restaurant @relation(fields: [restaurant_id], references: [id])
+
+  @@map("areas")
+}
+
+model SupplyCategory {
+  id     String  @id @default(uuid())
+  name   String
+  status Boolean @default(true)
+
+  restaurant_id String
+  restaurant    Restaurant @relation(fields: [restaurant_id], references: [id])
+
+  supplies Supply[]
+
+  @@map("supplies_categories")
 }
 
 model Supply {
@@ -60,21 +91,41 @@ model Supply {
   equivalence_um     String?
   equivalence_amount Float?
 
+  category_id String
+  category    SupplyCategory @relation(fields: [category_id], references: [id])
+
   restaurant_id String
   restaurant    Restaurant @relation(fields: [restaurant_id], references: [id])
 
   subproducts SupplyOnSubproduct[]
   products    SupplyOnProduct[]
+  warehouses  SupplyOnWarehouse[]
 
   @@map("supplies")
+}
+
+model SubproductCategory {
+  id     String  @id @default(uuid())
+  name   String
+  status Boolean @default(true)
+
+  restaurant_id String
+  restaurant    Restaurant @relation(fields: [restaurant_id], references: [id])
+
+  subproducts Subproduct[]
+
+  @@map("subproducts_categories")
 }
 
 model Subproduct {
   id     String  @id @default(uuid())
   name   String
   um     String
-  yield  Float
+  yield  Float   @default(1)
   status Boolean @default(true)
+
+  category_id String
+  category    SubproductCategory @relation(fields: [category_id], references: [id])
 
   restaurant_id String
   restaurant    Restaurant @relation(fields: [restaurant_id], references: [id])
@@ -83,27 +134,130 @@ model Subproduct {
   base_subproducts       SubproductOnSubproduct[] @relation("base")
   ingredient_subproducts SubproductOnSubproduct[] @relation("ingredient")
   products               SubproductOnProduct[]
+  warehouses             SubproductOnWarehouse[]
 
   @@map("subproducts")
+}
+
+model ProductCategory {
+  id     String  @id @default(uuid())
+  name   String
+  status Boolean @default(true)
+
+  restaurant_id String
+  restaurant    Restaurant @relation(fields: [restaurant_id], references: [id])
+
+  products Product[]
+
+  @@map("products_categories")
 }
 
 model Product {
   id     String  @id @default(uuid())
   name   String
-  price  Float
+  price  Float   @default(0)
   status Boolean @default(true)
+
+  category_id String
+  category    ProductCategory @relation(fields: [category_id], references: [id])
 
   restaurant_id String
   restaurant    Restaurant @relation(fields: [restaurant_id], references: [id])
 
   supplies    SupplyOnProduct[]
   subproducts SubproductOnProduct[]
+  combos      ProductOnCombo[]
 
   @@map("products")
 }
 
+model ComboCategory {
+  id     String  @id @default(uuid())
+  name   String
+  status Boolean @default(true)
+
+  restaurant_id String
+  restaurant    Restaurant @relation(fields: [restaurant_id], references: [id])
+
+  combos Combo[]
+
+  @@map("combos_categories")
+}
+
+model Combo {
+  id     String  @id @default(uuid())
+  name   String
+  price  Float   @default(0)
+  status Boolean @default(true)
+
+  category_id String
+  category    ComboCategory @relation(fields: [category_id], references: [id])
+
+  restaurant_id String
+  restaurant    Restaurant @relation(fields: [restaurant_id], references: [id])
+
+  products ProductOnCombo[]
+
+  @@map("combos")
+}
+
+model ProductOnCombo {
+  amount Int @default(1)
+
+  product_id String
+  product    Product @relation(fields: [product_id], references: [id])
+
+  combo_id String
+  combo    Combo  @relation(fields: [combo_id], references: [id])
+
+  @@id([product_id, combo_id])
+  @@map("products_on_combos")
+}
+
+model Warehouse {
+  id     String  @id @default(uuid())
+  name   String
+  status Boolean @default(true)
+
+  restaurant_id String
+  restaurant    Restaurant @relation(fields: [restaurant_id], references: [id])
+
+  supplies    SupplyOnWarehouse[]
+  subproducts SubproductOnWarehouse[]
+
+  @@map("warehouses")
+}
+
+model SupplyOnWarehouse {
+  min_stock Float?
+  max_stock Float?
+
+  supply_id String
+  supply    Supply @relation(fields: [supply_id], references: [id])
+
+  warehouse_id String
+  warehouse    Warehouse @relation(fields: [warehouse_id], references: [id])
+
+  @@id([supply_id, warehouse_id])
+  @@map("supplies_on_warehouses")
+}
+
+model SubproductOnWarehouse {
+  min_stock Float?
+  max_stock Float?
+
+  subproduct_id String
+  subproduct    Subproduct @relation(fields: [subproduct_id], references: [id])
+
+  warehouse_id String
+  warehouse    Warehouse @relation(fields: [warehouse_id], references: [id])
+
+  @@id([subproduct_id, warehouse_id])
+  @@map("subproducts_on_warehouses")
+}
+
 model SupplyOnSubproduct {
-  amount          Float
+  amount          Float   @default(1)
   use_equivalence Boolean @default(false)
 
   subproduct_id String
@@ -117,7 +271,7 @@ model SupplyOnSubproduct {
 }
 
 model SubproductOnSubproduct {
-  amount Float
+  amount Float @default(1)
 
   base_subproduct_id String
   base_subproduct    Subproduct @relation("base", fields: [base_subproduct_id], references: [id])
@@ -130,7 +284,7 @@ model SubproductOnSubproduct {
 }
 
 model SupplyOnProduct {
-  amount          Float
+  amount          Float   @default(1)
   use_equivalence Boolean @default(false)
 
   supply_id String
@@ -144,7 +298,7 @@ model SupplyOnProduct {
 }
 
 model SubproductOnProduct {
-  amount Float
+  amount Float @default(1)
 
   subproduct_id String
   subproduct    Subproduct @relation(fields: [subproduct_id], references: [id])
