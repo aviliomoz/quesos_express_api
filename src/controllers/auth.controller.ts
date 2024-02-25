@@ -2,11 +2,7 @@ import { Request, Response } from "express";
 import { prisma } from "../libs/prisma";
 import { User } from "@prisma/client";
 import { hashPassword, validatePassword } from "../utils/crypto";
-import {
-  TokenError,
-  createAccessToken,
-  createRefreshToken,
-} from "../utils/tokens";
+import { TokenError, createToken } from "../utils/tokens";
 
 class AuthError extends Error {
   constructor(message: string) {
@@ -36,15 +32,10 @@ export const signup = async (req: Request, res: Response) => {
       },
     });
 
-    const access_token = createAccessToken({ uid: user.id });
-    const refresh_token = createRefreshToken({ uid: user.id });
+    const token = createToken({ uid: user.id });
 
-    res.cookie("access_token", access_token, {
+    res.cookie("token", token, {
       httpOnly: true,
-    });
-
-    res.cookie("refresh_token", refresh_token, {
-      httpOnly: false,
     });
 
     return res.status(201).json({
@@ -77,15 +68,10 @@ export const login = async (req: Request, res: Response) => {
 
     if (!validPassword) throw new AuthError("Invalid credentials");
 
-    const access_token = createAccessToken({ uid: user.id });
-    const refresh_token = createRefreshToken({ uid: user.id });
+    const token = createToken({ uid: user.id });
 
-    res.cookie("access_token", access_token, {
+    res.cookie("token", token, {
       httpOnly: true,
-    });
-
-    res.cookie("refresh_token", refresh_token, {
-      httpOnly: false,
     });
 
     return res.status(200).json({ message: "User logged" });

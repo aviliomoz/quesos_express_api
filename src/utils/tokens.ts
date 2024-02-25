@@ -1,14 +1,14 @@
-import jwt from "jsonwebtoken";
+import jwt, { TokenExpiredError } from "jsonwebtoken";
 
-const access_token_secret = process.env.ACCESS_TOKEN_SECRET;
-const refresh_token_secret = process.env.REFRESH_TOKEN_SECRET;
-
-const access_token_expiration = 60 * 60 * 4;
-const refresh_token_expiration = 60 * 60 * 24 * 7;
+const token_secret = process.env.TOKEN_SECRET;
+const token_expiration = 60 * 60 * 4;
 
 export class TokenError extends Error {
-  constructor(message: string) {
+  expired: boolean;
+
+  constructor(message: string, options: { expired?: boolean } = {}) {
     super(message);
+    this.expired = options.expired ?? false;
   }
 }
 
@@ -16,34 +16,51 @@ interface UID {
   uid: string;
 }
 
-export const createAccessToken = (payload: UID) => {
-  if (!access_token_secret) throw new TokenError("Secret key not provided");
+interface Token {
+  uid: string;
+  iat: number;
+  exp: number;
+}
 
-  return jwt.sign(payload, access_token_secret, {
-    expiresIn: access_token_expiration,
+interface TokenVerification {
+  error: null | TokenError;
+  token: null | Token;
+}
+
+export const createToken = (payload: UID) => {
+  if (!token_secret) throw new TokenError("Secret key not provided");
+
+  return jwt.sign(payload, token_secret, {
+    expiresIn: token_expiration,
   });
 };
 
-export const createRefreshToken = (payload: UID) => {
-  if (!refresh_token_secret) throw new TokenError("Secret key not provided");
+export const verifyToken = (token: string): Promise<TokenVerification> => {
+  return new Promise((resolve, reject) => {
+    if (!token_secret) {
+      return {
+        error: new TokenError("Secret key not provided"),
+        token: null,
+      };
+    }
 
-  return jwt.sign(payload, refresh_token_secret, {
-    expiresIn: refresh_token_expiration,
-  });
-};
-
-export const validateAccessToken = (token: string) => {
-  if (!access_token_secret) throw new TokenError("Secret key not provided");
-
-  return jwt.verify(token, access_token_secret, (error) => {
-    if (error) throw new TokenError(error.message);
-  });
-};
-
-export const validateRefreshToken = (token: string) => {
-  if (!refresh_token_secret) throw new TokenError("Secret key not provided");
-
-  return jwt.verify(token, refresh_token_secret, (error) => {
-    if (error) throw new TokenError(error.message);
+    jwt.verify(token, token_secret, (error, decoded) => {
+      if (error) {
+        if (error instanceof TokenExpiredError) {
+          resolve({
+            error: new TokenError("Expired token", { expired: true }),
+            token: decoded as Token,
+          });
+        } else {
+          resolve({ error: new TokenError(error.message), token: null });
+        }
+      } else {
+        if (!decoded) {
+          resolve({ error: null, token: null });
+        } else {
+          resolve({ error: null, token: decoded as Token });
+        }
+      }
+    });
   });
 };
