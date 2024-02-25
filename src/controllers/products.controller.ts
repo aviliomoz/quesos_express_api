@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { prisma } from "../libs/prisma";
-import { buildProductRecipe } from "../functions/recipes";
+import { buildProductRecipe } from "../utils/recipes";
 import { ProductWithRecipe } from "../types";
 
 export const getProducts = async (req: Request, res: Response) => {

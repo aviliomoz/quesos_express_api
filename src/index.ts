@@ -1,10 +1,9 @@
 import express, { type Express } from "express";
 import dotenv from "dotenv";
 import cors from "cors";
+import cookieParser from "cookie-parser";
 
-import restaurantsRouter from "./routes/restaurants.routes";
-import productsRouter from "./routes/products.routes";
-import authRouter from "./routes/auth.routes";
+import apiRouter from "./routes/api.routes";
 
 dotenv.config();
 
@@ -14,6 +13,7 @@ const origins = [process.env.WEB_APP_ORIGIN];
 const app: Express = express();
 
 app.use(express.json());
+app.use(cookieParser());
 
 app.use(
   cors({
@@ -27,10 +27,7 @@ app.use(
   })
 );
 
-// Routes
-app.use("/api", restaurantsRouter);
-app.use("/api", productsRouter);
-app.use("/api/auth", authRouter);
+app.use("/api", apiRouter);
 
 app.listen(port, () => {
   console.log(`[server] Server is running at http://localhost:${port}`);

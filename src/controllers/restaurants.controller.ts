@@ -5,7 +5,7 @@ import { Restaurant } from "@prisma/client";
 
 export const getRestaurants = async (req: Request, res: Response) => {
   try {
-    const results = await prisma.teams.findMany({
+    const results = await prisma.team.findMany({
       where: {
         user_id: (req as IRequest).user_id,
       },

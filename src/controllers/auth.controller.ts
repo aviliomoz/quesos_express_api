@@ -1,98 +1,101 @@
 import { Request, Response } from "express";
 import { prisma } from "../libs/prisma";
 import { User } from "@prisma/client";
-import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
+import { hashPassword, validatePassword } from "../utils/crypto";
+import {
+  TokenError,
+  createAccessToken,
+  createRefreshToken,
+} from "../utils/tokens";
 
-const secret = process.env.JWT_SECRET || "";
+class AuthError extends Error {
+  constructor(message: string) {
+    super(message);
+  }
+}
 
 export const signup = async (req: Request, res: Response) => {
   const { name, email, password }: User = req.body;
 
-  const foundUser = await prisma.user.findFirst({
-    where: {
-      email,
-    },
-  });
-
-  if (foundUser)
-    return res.json({
-      message: "User already signed up",
+  try {
+    const foundUser = await prisma.user.findFirst({
+      where: {
+        email,
+      },
     });
 
-  const hashedPassword = await bcrypt.hash(password, 10);
+    if (foundUser) throw new AuthError("User already signed up");
 
-  const user = await prisma.user.create({
-    data: {
-      email,
-      password: hashedPassword,
-      name,
-    },
-  });
+    const hashedPassword = await hashPassword(password);
 
-  const token = jwt.sign({ uid: user.id }, secret, {
-    expiresIn: 60 * 60 * 24 * 7,
-  });
+    const user = await prisma.user.create({
+      data: {
+        email,
+        password: hashedPassword,
+        name,
+      },
+    });
 
-  return res.json({
-    message: "User created",
-    token,
-  });
+    const access_token = createAccessToken({ uid: user.id });
+    const refresh_token = createRefreshToken({ uid: user.id });
+
+    res.cookie("access_token", access_token, {
+      httpOnly: true,
+    });
+
+    res.cookie("refresh_token", refresh_token, {
+      httpOnly: false,
+    });
+
+    return res.status(201).json({
+      message: "User created",
+    });
+  } catch (error) {
+    if (error instanceof TokenError) {
+      return res.status(498).json({ error: error.message });
+    } else if (error instanceof AuthError) {
+      return res.status(406).json({ error: error.message });
+    } else if (error instanceof Error) {
+      return res.status(500).json({ error: error.message });
+    }
+  }
 };
 
 export const login = async (req: Request, res: Response) => {
   const { email, password }: User = req.body;
 
-  const user = await prisma.user.findFirst({
-    where: {
-      email,
-    },
-  });
-
-  if (!user)
-    return res.json({
-      message: "Invalid credentials",
-    });
-
-  const validPassword = await bcrypt.compare(password, user.password);
-
-  if (!validPassword)
-    return res.json({
-      message: "Invalid credentials",
-    });
-
-  const token = jwt.sign({ uid: user.id }, secret, {
-    expiresIn: 60 * 60 * 24 * 7,
-  });
-
-  return res.status(200).json({ message: "User logged", token });
-};
-
-export const refresh = async (req: Request, res: Response) => {
-  const session =
-    req.headers.authorization && req.headers.authorization.split(" ")[1];
-
-  if (!session) return res.json({ message: "Token not found" });
-
   try {
-    const decoded = jwt.verify(session, secret);
-
-    const newToken = jwt.sign(decoded, secret, {
-      // expiresIn: 60 * 60 * 24 * 7,
+    const user = await prisma.user.findFirst({
+      where: {
+        email,
+      },
     });
 
-    res.json({
-      message: "Token refreshed",
-      token: newToken,
+    if (!user) throw new AuthError("Invalid credentials");
+
+    const validPassword = await validatePassword(password, user.password);
+
+    if (!validPassword) throw new AuthError("Invalid credentials");
+
+    const access_token = createAccessToken({ uid: user.id });
+    const refresh_token = createRefreshToken({ uid: user.id });
+
+    res.cookie("access_token", access_token, {
+      httpOnly: true,
     });
-  } catch (err) {
-    if (err instanceof jwt.TokenExpiredError) {
-      return res.status(401).json({ message: "Token expired" });
-    } else if (err instanceof jwt.JsonWebTokenError) {
-      return res.status(401).json({ message: "Invalid token" });
-    } else {
-      console.error("Error refreshing token:", err);
-      return res.status(500).json({ message: "Internal server error" });
+
+    res.cookie("refresh_token", refresh_token, {
+      httpOnly: false,
+    });
+
+    return res.status(200).json({ message: "User logged" });
+  } catch (error) {
+    if (error instanceof TokenError) {
+      return res.status(498).json({ error: error.message });
+    } else if (error instanceof AuthError) {
+      return res.status(406).json({ error: error.message });
+    } else if (error instanceof Error) {
+      return res.status(500).json({ error: error.message });
     }
   }
 };

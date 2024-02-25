@@ -1,22 +1,35 @@
 import { Request, Response, NextFunction } from "express";
 import { IRequest } from "../types";
 import jwt from "jsonwebtoken";
+import { loginSchema, signupSchema } from "../schemas/auth.schema";
+import { ZodError } from "zod";
 
-export const validateToken = (
+export const validateSignupBody = (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
-  const token =
-    req.headers.authorization && req.headers.authorization.split(" ")[1];
+  try {
+    signupSchema.parse(req.body);
 
-  if (!token) return res.status(401).json({ error: "Unauthorized" });
+    next();
+  } catch (error) {
+    error instanceof ZodError &&
+      res.status(400).json({ error: error.errors[0].message });
+  }
+};
 
-  const decoded = jwt.verify(token, process.env.JWT_SECRET || "");
+export const validateLoginBody = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    loginSchema.parse(req.body);
 
-  if (!decoded)
-    return res.status(500).json({ error: "Error validating session" });
-
-  (req as IRequest).user_id = (decoded as { uid: string }).uid;
-  next();
+    next();
+  } catch (error) {
+    error instanceof ZodError &&
+      res.status(400).json({ error: error.errors[0].message });
+  }
 };
