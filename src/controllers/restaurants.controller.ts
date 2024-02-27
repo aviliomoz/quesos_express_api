@@ -47,6 +47,7 @@ export const createRestaurant = async (req: Request, res: Response) => {
       });
     }
 
+    // Create restaurant
     const restaurant = await prisma.restaurant.create({
       data: {
         name,
@@ -56,6 +57,7 @@ export const createRestaurant = async (req: Request, res: Response) => {
       },
     });
 
+    // Add user to de restaurant team
     await prisma.team.create({
       data: {
         user_id: (req as IRequest).user_id,
@@ -65,6 +67,51 @@ export const createRestaurant = async (req: Request, res: Response) => {
 
     return res.status(201).json({
       message: "Restaurant created",
+    });
+  } catch (error) {
+    if (error instanceof Error)
+      return res.status(500).json({ error: error.message });
+  }
+};
+
+export const updateRestaurant = async (req: Request, res: Response) => {
+  const id = req.params.id;
+  const body = req.body as object;
+
+  try {
+    await prisma.restaurant.update({
+      where: {
+        id,
+      },
+      data: { ...body },
+    });
+
+    return res.status(200).json({
+      message: "Restaurant updated",
+    });
+  } catch (error) {
+    if (error instanceof Error)
+      return res.status(500).json({ error: error.message });
+  }
+};
+
+export const toggleRestaurantStatus = async (req: Request, res: Response) => {
+  const id = req.params.id;
+
+  try {
+    const restaurant = await prisma.restaurant.findFirst({ where: { id } });
+
+    const newRestaurant = await prisma.restaurant.update({
+      where: {
+        id,
+      },
+      data: { status: !restaurant?.status },
+    });
+
+    return res.status(200).json({
+      message: `Restaurant has been ${
+        newRestaurant.status ? "activated" : "unactivated"
+      }`,
     });
   } catch (error) {
     if (error instanceof Error)
