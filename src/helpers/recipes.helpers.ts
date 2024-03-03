@@ -1,7 +1,7 @@
 import { prisma } from "../libs/prisma";
 import { Recipe } from "../types";
 
-export const buildSubproductRecipe = async (
+export const getSubproductRecipeHelper = async (
   subproduct_id: string
 ): Promise<Recipe> => {
   const supplies = await prisma.supplyOnSubproduct.findMany({
@@ -32,7 +32,7 @@ export const buildSubproductRecipe = async (
   };
 
   for await (const subproduct of subproducts) {
-    const recipe: Recipe = await buildSubproductRecipe(
+    const recipe: Recipe = await getSubproductRecipeHelper(
       subproduct.base_subproduct_id
     );
     const clean_subproduct = {
@@ -77,7 +77,7 @@ export const buildProductRecipe = async (
   };
 
   for await (const subproduct of subproducts) {
-    const recipe: Recipe = await buildSubproductRecipe(
+    const recipe: Recipe = await getSubproductRecipeHelper(
       subproduct.subproduct_id
     );
     const clean_subproduct = {

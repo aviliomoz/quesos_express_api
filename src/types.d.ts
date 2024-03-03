@@ -21,6 +21,21 @@ interface ProductWithRecipe extends Product {
 }
 
 interface IRequest extends Request {
-  user_id: string
+  user_id: string;
+  is_admin: boolean;
 }
 
+interface UID {
+  uid: string;
+}
+
+interface Token {
+  uid: string;
+  iat: number;
+  exp: number;
+}
+
+interface TokenVerification {
+  error: null | string;
+  token: null | Token;
+}

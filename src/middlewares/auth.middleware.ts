@@ -1,14 +1,8 @@
 import { Request, Response, NextFunction } from "express";
 import { IRequest } from "../types";
-import jwt from "jsonwebtoken";
-import { verifyToken, createToken, TokenError } from "../utils/tokens";
-import { prisma } from "../libs/prisma";
-
-class NotMemberError extends Error {
-  constructor(message: string) {
-    super(message);
-  }
-}
+import { verifyToken, createToken } from "../utils/tokens";
+import { AuthError, handleErrorResponse, TokenError } from "../utils/errors";
+import { validateMemberHelper } from "../helpers/restaurants.helpers";
 
 export const validateToken = async (
   req: Request,
@@ -16,18 +10,15 @@ export const validateToken = async (
   next: NextFunction
 ) => {
   try {
-    const { token } = req.cookies;
+    const token: string = req.cookies.token;
 
     if (!token) throw new TokenError("Token not provided");
 
-    const { error, token: decoded_token } = await verifyToken(token);
+    const { error, token: decoded_token } = verifyToken(token);
 
     if (error) {
       res.clearCookie("token");
-
-      if (error.expired) throw new TokenError("Unauthorized: Expired token");
-
-      throw new Error(error.message);
+      throw new TokenError(error);
     }
 
     if (decoded_token) {
@@ -36,7 +27,7 @@ export const validateToken = async (
       // Verifica si esta a menos de dos días para expirar
       if (expiresIn - Date.now() < 60 * 60 * 24 * 2 * 1000) {
         const newToken = createToken({ uid: decoded_token.uid });
-        res.cookie("token", newToken);
+        res.cookie("token", newToken, { httpOnly: true });
       }
 
       (req as IRequest).user_id = decoded_token.uid;
@@ -45,11 +36,7 @@ export const validateToken = async (
       throw new TokenError("Error validating token");
     }
   } catch (error) {
-    if (error instanceof TokenError) {
-      return res.status(401).json({ error: error.message });
-    } else if (error instanceof Error) {
-      return res.status(500).json({ error: error.message });
-    }
+    return handleErrorResponse(error, res);
   }
 };
 
@@ -60,19 +47,31 @@ export const validateMember = (from: "body" | "params") => {
       const restaurant_id: string =
         from === "body" ? req.body.restaurant_id : req.params.id;
 
-      const team = await prisma.team.findFirst({
-        where: { user_id, restaurant_id },
-      });
+      const member = await validateMemberHelper(user_id, restaurant_id);
 
-      if (!team) throw new NotMemberError("You are not member of the team");
+      if (!member) throw new AuthError("You are not member of the team");
+
+      (req as IRequest).is_admin = member.is_admin;
 
       next();
     } catch (error) {
-      if (error instanceof NotMemberError) {
-        return res.status(401).json({ error: error.message });
-      } else if (error instanceof Error) {
-        return res.status(500).json({ error: error.message });
-      }
+      return handleErrorResponse(error, res);
     }
   };
+};
+
+export const validateAdmin = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const is_admin: boolean = (req as IRequest).is_admin;
+
+    if (!is_admin) throw new AuthError("You are not admin");
+
+    next();
+  } catch (error) {
+    return handleErrorResponse(error, res);
+  }
 };
