@@ -39,3 +39,5 @@ interface TokenVerification {
   error: null | string;
   token: null | Token;
 }
+
+type CategoryType = "supplies" | "subproducts" | "products" | "combos";

@@ -1,14 +1,20 @@
 import { Restaurant } from "@prisma/client";
 import { prisma } from "../libs/prisma";
 import { z } from "zod";
-import {
-  createRestaurantSchema,
-  updateRestaurantSchema,
-} from "../schemas/restaurant.schema";
+import { restaurantSchema } from "../schemas/restaurant.schema";
 
 export const getRestaurantByIdHelper = async (id: string) => {
-    return prisma.restaurant.findFirst({ where: { id } });
-}
+  return prisma.restaurant.findFirst({ where: { id } });
+};
+
+export const getRestaurantByNameHelper = async (
+  name: string,
+  user_id: string
+) => {
+  const restaurants = await getRestaurantsByUserHelper(user_id);
+
+  return restaurants.find((restaurant) => restaurant.name === name);
+};
 
 export const getRestaurantsByUserHelper = async (user_id: string) => {
   const results = await prisma.team.findMany({
@@ -25,17 +31,8 @@ export const getRestaurantsByUserHelper = async (user_id: string) => {
   return restaurants;
 };
 
-export const validateMemberHelper = (
-  user_id: string,
-  restaurant_id: string
-) => {
-  return prisma.team.findFirst({
-    where: { user_id, restaurant_id },
-  });
-};
-
 export const createRestaurantHelper = (
-  data: z.infer<typeof createRestaurantSchema>
+  data: z.infer<typeof restaurantSchema>
 ) => {
   return prisma.restaurant.create({
     data,
@@ -44,12 +41,32 @@ export const createRestaurantHelper = (
 
 export const updateRestaurantHelper = (
   id: string,
-  data: z.infer<typeof updateRestaurantSchema>
+  data: z.infer<typeof restaurantSchema>
 ) => {
   return prisma.restaurant.update({
     where: {
       id,
     },
     data,
+  });
+};
+
+export const toggleRestaurantHelper = async (id: string) => {
+  const restaurant = await getRestaurantByIdHelper(id);
+
+  if (!restaurant) throw new Error("Error fetching restaurant");
+
+  return prisma.restaurant.update({
+    where: { id },
+    data: { ...restaurant, status: !restaurant.status },
+  });
+};
+
+export const validateMemberHelper = (
+  user_id: string,
+  restaurant_id: string
+) => {
+  return prisma.team.findFirst({
+    where: { user_id, restaurant_id },
   });
 };

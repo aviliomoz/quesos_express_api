@@ -40,12 +40,11 @@ export const validateToken = async (
   }
 };
 
-export const validateMember = (from: "body" | "params") => {
+export const validateMember = () => {
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
       const user_id = (req as IRequest).user_id;
-      const restaurant_id: string =
-        from === "body" ? req.body.restaurant_id : req.params.id;
+      const restaurant_id: string = req.params.restaurant_id;
 
       const member = await validateMemberHelper(user_id, restaurant_id);
 

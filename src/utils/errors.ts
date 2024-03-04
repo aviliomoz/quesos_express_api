@@ -12,6 +12,12 @@ export class TokenError extends Error {
   }
 }
 
+export class DuplicateError extends Error {
+  constructor(message: string) {
+    super(message);
+  }
+}
+
 export const handleErrorResponse = (error: unknown, res: Response) => {
   if (error instanceof TokenError)
     return res
@@ -22,6 +28,11 @@ export const handleErrorResponse = (error: unknown, res: Response) => {
     return res
       .status(401)
       .json({ message: "Auth error", error: error.message });
+
+  if (error instanceof DuplicateError)
+    return res
+      .status(409)
+      .json({ message: "Duplicate error", error: error.message });
 
   if (error instanceof Error)
     return res

@@ -3,11 +3,12 @@ import { IRequest } from "../types";
 import { Restaurant } from "@prisma/client";
 import {
   createRestaurantHelper,
-  getRestaurantByIdHelper,
+  getRestaurantByNameHelper,
   getRestaurantsByUserHelper,
+  toggleRestaurantHelper,
   updateRestaurantHelper,
 } from "../helpers/restaurants.helpers";
-import { handleErrorResponse } from "../utils/errors";
+import { DuplicateError, handleErrorResponse } from "../utils/errors";
 import { joinTeamHelper } from "../helpers/teams.helpers";
 
 export const getRestaurants = async (req: Request, res: Response) => {
@@ -27,15 +28,13 @@ export const createRestaurant = async (req: Request, res: Response) => {
 
   // Check if restaurant name is aready used
   try {
-    const restaurants = await getRestaurantsByUserHelper(
+    const foundRestaurant = await getRestaurantByNameHelper(
+      name,
       (req as IRequest).user_id
     );
 
-    if (restaurants.map((restaurant) => restaurant.name).includes(name)) {
-      return res.status(400).json({
-        error: "Provided restaurant name already exists in your list",
-      });
-    }
+    if (foundRestaurant)
+      throw new DuplicateError("Provided restaurant name is already used");
 
     // Create restaurant
     const restaurant = await createRestaurantHelper({
@@ -79,15 +78,11 @@ export const toggleRestaurantStatus = async (req: Request, res: Response) => {
   const id = req.params.id;
 
   try {
-    const restaurant = await getRestaurantByIdHelper(id);
-
-    const newRestaurant = await updateRestaurantHelper(id, {
-      status: !restaurant?.status,
-    });
+    const restaurant = await toggleRestaurantHelper(id);
 
     return res.status(200).json({
       message: `Restaurant has been ${
-        newRestaurant.status ? "activated" : "unactivated"
+        restaurant.status ? "activated" : "unactivated"
       }`,
     });
   } catch (error) {

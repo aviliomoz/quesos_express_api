@@ -11,37 +11,43 @@ import {
   validateToken,
 } from "../middlewares/auth.middleware";
 import { validateSchema } from "../middlewares/validations.middleware";
-import {
-  createRestaurantSchema,
-  updateRestaurantSchema,
-} from "../schemas/restaurant.schema";
+import { restaurantSchema } from "../schemas/restaurant.schema";
+import membersRouter from "../routes/members.routes";
 
 const router = Router();
 
 router.get("/", validateToken, getRestaurants);
 
+router.get("/:restaurant_id", validateToken, validateMember, (req, res) => {
+  return res.status(200).json({
+    route: "Get restaurant",
+  });
+});
+
 router.post(
   "/",
   validateToken,
-  validateSchema(createRestaurantSchema),
+  validateSchema(restaurantSchema),
   createRestaurant
 );
 
 router.put(
-  "/:id",
+  "/:restaurant_id",
   validateToken,
-  validateMember("params"),
+  validateMember,
   validateAdmin,
-  validateSchema(updateRestaurantSchema),
+  validateSchema(restaurantSchema.partial()),
   updateRestaurant
 );
 
 router.patch(
-  "/:id",
+  "/:restaurant_id",
   validateToken,
-  validateMember("params"),
+  validateMember,
   validateAdmin,
   toggleRestaurantStatus
 );
+
+router.use("/:restaurant_id", membersRouter);
 
 export default router;
