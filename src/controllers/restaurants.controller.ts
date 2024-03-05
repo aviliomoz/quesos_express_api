@@ -5,7 +5,6 @@ import {
   createRestaurantHelper,
   getRestaurantByNameHelper,
   getRestaurantsByUserHelper,
-  toggleRestaurantHelper,
   updateRestaurantHelper,
 } from "../helpers/restaurants.helpers";
 import { DuplicateError, handleErrorResponse } from "../utils/errors";
@@ -24,12 +23,12 @@ export const getRestaurants = async (req: Request, res: Response) => {
 };
 
 export const createRestaurant = async (req: Request, res: Response) => {
-  const { name, currency_code, purchase_tax, sales_tax }: Restaurant = req.body;
+  const data: Restaurant = req.body;
 
   // Check if restaurant name is aready used
   try {
     const foundRestaurant = await getRestaurantByNameHelper(
-      name,
+      data.name,
       (req as IRequest).user_id
     );
 
@@ -37,19 +36,12 @@ export const createRestaurant = async (req: Request, res: Response) => {
       throw new DuplicateError("Provided restaurant name is already used");
 
     // Create restaurant
-    const restaurant = await createRestaurantHelper({
-      name,
-      currency_code,
-      purchase_tax,
-      sales_tax,
-    });
+    const restaurant = await createRestaurantHelper(data);
 
     // Add user to de restaurant team
     await joinTeamHelper((req as IRequest).user_id, restaurant.id, {
       is_admin: true,
     });
-
-    // TODO Initialize categories
 
     return res.status(201).json({
       message: "Restaurant created",
@@ -60,30 +52,14 @@ export const createRestaurant = async (req: Request, res: Response) => {
 };
 
 export const updateRestaurant = async (req: Request, res: Response) => {
-  const id = req.params.id;
+  const restaurant_id = req.params.restaurant_id;
   const data: Restaurant = req.body;
 
   try {
-    await updateRestaurantHelper(id, data);
+    await updateRestaurantHelper(restaurant_id, data);
 
     return res.status(200).json({
       message: "Restaurant updated",
-    });
-  } catch (error) {
-    return handleErrorResponse(error, res);
-  }
-};
-
-export const toggleRestaurantStatus = async (req: Request, res: Response) => {
-  const id = req.params.id;
-
-  try {
-    const restaurant = await toggleRestaurantHelper(id);
-
-    return res.status(200).json({
-      message: `Restaurant has been ${
-        restaurant.status ? "activated" : "unactivated"
-      }`,
     });
   } catch (error) {
     return handleErrorResponse(error, res);

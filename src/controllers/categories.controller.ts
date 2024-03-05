@@ -1,26 +1,26 @@
 import { Request, Response } from "express";
-import { CategoryType } from "../types";
+import { CategoryType, IRequest } from "../types";
 import { DuplicateError, handleErrorResponse } from "../utils/errors";
 import {
   createCategoryHelper,
   getCategoriesHelper,
   getCategoryByIdHelper,
   getCategoryByNameHelper,
+  updateCategoryHelper,
 } from "../helpers/categories.helpers";
-import { Category } from "@prisma/client";
+import { Category, Restaurant } from "@prisma/client";
 
-export const getCategories = (type: CategoryType) => {
-  return async (req: Request, res: Response) => {
-    const restaurant_id: string = req.params.restaurant_id;
+export const getCategories = async (req: Request, res: Response) => {
+  const restaurant_id: string = (req as IRequest).restaurant_id;
+  const type: CategoryType = req.body.type;
 
-    try {
-      const categories = await getCategoriesHelper(type, restaurant_id);
+  try {
+    const categories = await getCategoriesHelper(type, restaurant_id);
 
-      return res.status(200).json(categories);
-    } catch (error) {
-      return handleErrorResponse(error, res);
-    }
-  };
+    return res.status(200).json(categories);
+  } catch (error) {
+    return handleErrorResponse(error, res);
+  }
 };
 
 export const getCategoryById = async (req: Request, res: Response) => {
@@ -36,26 +36,35 @@ export const getCategoryById = async (req: Request, res: Response) => {
 };
 
 export const createCategory = async (req: Request, res: Response) => {
-  const restaurant_id: string = req.params.restaurant_id;
-  const { name, type }: Category = req.body;
+  const restaurant_id: string = (req as IRequest).restaurant_id;
+  const data: Category = req.body;
 
   try {
     const foundCategory = await getCategoryByNameHelper(
-      name,
-      restaurant_id,
-      type
+      data.name,
+      data.type,
+      restaurant_id
     );
 
     if (foundCategory)
-      throw new DuplicateError("Category name provided is aready used");
+      throw new DuplicateError("Category name provided is already used");
 
-    await createCategoryHelper({
-      name,
-      type,
-      restaurant_id,
-    });
+    await createCategoryHelper({ ...data, restaurant_id });
 
     return res.status(201).json({ message: "Category created" });
+  } catch (error) {
+    return handleErrorResponse(error, res);
+  }
+};
+
+export const updateCategory = async (req: Request, res: Response) => {
+  const id: string = req.params.id;
+  const data: Category = req.body;
+
+  try {
+    await updateCategoryHelper(id, data);
+
+    return res.status(200).json({ message: "Category updated" });
   } catch (error) {
     return handleErrorResponse(error, res);
   }

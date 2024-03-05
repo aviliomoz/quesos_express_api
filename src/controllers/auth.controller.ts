@@ -61,3 +61,13 @@ export const login = async (req: Request, res: Response) => {
     return handleErrorResponse(error, res);
   }
 };
+
+export const logout = (req: Request, res: Response) => {
+  try {
+    res.clearCookie("token");
+
+    return res.status(200).json({ message: "User logged out" });
+  } catch (error) {
+    return handleErrorResponse(error, res);
+  }
+};

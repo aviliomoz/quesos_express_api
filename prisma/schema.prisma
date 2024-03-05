@@ -35,7 +35,6 @@ model Restaurant {
   supplies    Supply[]
   subproducts Subproduct[]
   products    Product[]
-  combos      Combo[]
 
   @@map("restaurants")
 }
@@ -76,7 +75,6 @@ model Category {
   supplies    Supply[]
   subproducts Subproduct[]
   products    Product[]
-  combos      Combo[]
 
   @@map("categories")
 }
@@ -138,41 +136,25 @@ model Product {
   restaurant_id String
   restaurant    Restaurant @relation(fields: [restaurant_id], references: [id])
 
-  supplies    SupplyOnProduct[]
-  subproducts SubproductOnProduct[]
-  combos      ProductOnCombo[]
+  supplies            SupplyOnProduct[]
+  subproducts         SubproductOnProduct[]
+  base_products       ProductOnProduct[]    @relation("base")
+  ingredient_products ProductOnProduct[]    @relation("ingredient")
 
   @@map("products")
 }
 
-model Combo {
-  id     String  @id @default(uuid())
-  name   String
-  price  Float   @default(0)
-  status Boolean @default(true)
-
-  category_id String
-  category    Category @relation(fields: [category_id], references: [id])
-
-  restaurant_id String
-  restaurant    Restaurant @relation(fields: [restaurant_id], references: [id])
-
-  products ProductOnCombo[]
-
-  @@map("combos")
-}
-
-model ProductOnCombo {
+model ProductOnProduct {
   amount Int @default(1)
 
-  product_id String
-  product    Product @relation(fields: [product_id], references: [id])
+  base_product_id String
+  base_product    Product @relation("base", fields: [base_product_id], references: [id])
 
-  combo_id String
-  combo    Combo  @relation(fields: [combo_id], references: [id])
+  ingredient_product_id String
+  ingredient_product    Product @relation("ingredient", fields: [ingredient_product_id], references: [id])
 
-  @@id([product_id, combo_id])
-  @@map("products_on_combos")
+  @@id([base_product_id, ingredient_product_id])
+  @@map("products_on_products")
 }
 
 model SupplyOnSubproduct {

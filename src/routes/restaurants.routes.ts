@@ -2,7 +2,6 @@ import { Router } from "express";
 import {
   createRestaurant,
   getRestaurants,
-  toggleRestaurantStatus,
   updateRestaurant,
 } from "../controllers/restaurants.controller";
 import {
@@ -17,12 +16,6 @@ import membersRouter from "../routes/members.routes";
 const router = Router();
 
 router.get("/", validateToken, getRestaurants);
-
-router.get("/:restaurant_id", validateToken, validateMember, (req, res) => {
-  return res.status(200).json({
-    route: "Get restaurant",
-  });
-});
 
 router.post(
   "/",
@@ -40,14 +33,6 @@ router.put(
   updateRestaurant
 );
 
-router.patch(
-  "/:restaurant_id",
-  validateToken,
-  validateMember,
-  validateAdmin,
-  toggleRestaurantStatus
-);
-
-router.use("/:restaurant_id", membersRouter);
+router.use("/:restaurant_id", validateToken, validateMember, membersRouter);
 
 export default router;

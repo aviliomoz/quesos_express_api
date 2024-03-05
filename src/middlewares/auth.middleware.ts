@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import { IRequest } from "../types";
 import { verifyToken, createToken } from "../utils/tokens";
 import { AuthError, handleErrorResponse, TokenError } from "../utils/errors";
-import { validateMemberHelper } from "../helpers/restaurants.helpers";
+import { validateMemberHelper } from "../helpers/validations.helpers";
 
 export const validateToken = async (
   req: Request,
@@ -40,23 +40,26 @@ export const validateToken = async (
   }
 };
 
-export const validateMember = () => {
-  return async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const user_id = (req as IRequest).user_id;
-      const restaurant_id: string = req.params.restaurant_id;
+export const validateMember = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const user_id = (req as IRequest).user_id;
+  const restaurant_id: string = req.params.restaurant_id;
 
-      const member = await validateMemberHelper(user_id, restaurant_id);
+  try {
+    const member = await validateMemberHelper(user_id, restaurant_id);
 
-      if (!member) throw new AuthError("You are not member of the team");
+    if (!member) throw new AuthError("You are not member of the team");
 
-      (req as IRequest).is_admin = member.is_admin;
+    (req as IRequest).is_admin = member.is_admin;
+    (req as IRequest).restaurant_id = restaurant_id;
 
-      next();
-    } catch (error) {
-      return handleErrorResponse(error, res);
-    }
-  };
+    next();
+  } catch (error) {
+    return handleErrorResponse(error, res);
+  }
 };
 
 export const validateAdmin = (

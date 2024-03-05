@@ -18,6 +18,12 @@ export class DuplicateError extends Error {
   }
 }
 
+export class RequestError extends Error {
+  constructor(message: string) {
+    super(message);
+  }
+}
+
 export const handleErrorResponse = (error: unknown, res: Response) => {
   if (error instanceof TokenError)
     return res
@@ -33,6 +39,11 @@ export const handleErrorResponse = (error: unknown, res: Response) => {
     return res
       .status(409)
       .json({ message: "Duplicate error", error: error.message });
+
+  if (error instanceof RequestError)
+    return res
+      .status(400)
+      .json({ message: "Bad request error", error: error.message });
 
   if (error instanceof Error)
     return res

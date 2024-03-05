@@ -1,7 +1,6 @@
-import { z } from "zod";
 import { prisma } from "../libs/prisma";
-import { categorySchema } from "../schemas/category.schema";
 import { CategoryType } from "../types";
+import { Category } from "@prisma/client";
 
 export const getCategoriesHelper = (
   type: CategoryType,
@@ -37,24 +36,10 @@ export const getCategoryByNameHelper = (
   });
 };
 
-export const createCategoryHelper = (data: z.infer<typeof categorySchema>) => {
+export const createCategoryHelper = (data: Category) => {
   return prisma.category.create({ data });
 };
 
-export const updateCategoryHelper = (
-  id: string,
-  data: z.infer<typeof categorySchema>
-) => {
+export const updateCategoryHelper = (id: string, data: Category) => {
   return prisma.category.update({ where: { id }, data });
-};
-
-export const toggleCategoryHelper = async (id: string) => {
-  const category = await getCategoryByIdHelper(id);
-
-  if (!category) throw new Error("Error fetching category");
-
-  return prisma.category.update({
-    where: { id },
-    data: { ...category, status: !category.status },
-  });
 };

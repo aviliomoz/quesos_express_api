@@ -23,6 +23,7 @@ interface ProductWithRecipe extends Product {
 interface IRequest extends Request {
   user_id: string;
   is_admin: boolean;
+  restaurant_id: string;
 }
 
 interface UID {
