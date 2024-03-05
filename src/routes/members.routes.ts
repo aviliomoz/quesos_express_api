@@ -9,6 +9,5 @@ router.use("/categories", categoriesRouter);
 // supplies
 // subproducts
 // products
-// combos
 
 export default router;

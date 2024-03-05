@@ -8,7 +8,7 @@ import {
   getCategoryByNameHelper,
   updateCategoryHelper,
 } from "../helpers/categories.helpers";
-import { Category, Restaurant } from "@prisma/client";
+import { Category } from "@prisma/client";
 
 export const getCategories = async (req: Request, res: Response) => {
   const restaurant_id: string = (req as IRequest).restaurant_id;
