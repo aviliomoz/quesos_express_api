@@ -6,149 +6,276 @@ generator client {
 }
 
 datasource db {
-  provider = "mongodb"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
 model User {
-  id       String @id @default(auto()) @map("_id") @db.ObjectId
+  id       String @id @default(cuid())
   name     String
   email    String @unique
   password String
 
-  restaurants_ids String[]     @db.ObjectId
-  restaurants     Restaurant[] @relation(fields: [restaurants_ids], references: [id])
+  restaurants UserOnRestaurant[]
 
   @@map("users")
 }
 
 model Restaurant {
-  id            String  @id @default(auto()) @map("_id") @db.ObjectId
+  id            String  @id @default(cuid())
   name          String
   currency_code String  @default("USD")
   purchase_tax  Float   @default(18.00)
   sales_tax     Float   @default(18.00)
   status        Boolean @default(true)
 
-  areas       Area[]
-  categories  Category[]
+  users UserOnRestaurant[]
+  areas Area[]
+
+  supply_categories     SupplyCategory[]
+  subproduct_categories SubproductCategory[]
+  product_categories    ProductCategory[]
+  combo_categories      ComboCategory[]
+
   supplies    Supply[]
   subproducts Subproduct[]
   products    Product[]
   combos      Combo[]
 
-  users_ids String[] @db.ObjectId
-  users     User[]   @relation(fields: [users_ids], references: [id])
-
   @@map("restaurants")
 }
 
+model UserOnRestaurant {
+  is_admin Boolean @default(false)
+
+  user_id String
+  user    User   @relation(fields: [user_id], references: [id])
+
+  restaurant_id String
+  restaurant    Restaurant @relation(fields: [restaurant_id], references: [id])
+
+  @@id([user_id, restaurant_id])
+  @@map("users_on_restaurants")
+}
+
 model Area {
-  id     String  @id @default(auto()) @map("_id") @db.ObjectId
+  id     String  @id @default(cuid())
   name   String
   status Boolean @default(true)
 
-  restaurant_id String     @db.ObjectId
+  restaurant_id String
   restaurant    Restaurant @relation(fields: [restaurant_id], references: [id])
 
   @@map("areas")
 }
 
-model Category {
-  id     String  @id @default(auto()) @map("_id") @db.ObjectId
-  type   String
+model SupplyCategory {
+  id     String  @id @default(cuid())
   name   String
   status Boolean @default(true)
 
-  restaurant_id String     @db.ObjectId
+  restaurant_id String
   restaurant    Restaurant @relation(fields: [restaurant_id], references: [id])
 
-  supplies    Supply[]
-  subproducts Subproduct[]
-  products    Product[]
-  combos      Combo[]
+  supplies Supply[]
 
-  @@map("categories")
+  @@map("supply_categories")
+}
+
+model SubproductCategory {
+  id     String  @id @default(cuid())
+  name   String
+  status Boolean @default(true)
+
+  restaurant_id String
+  restaurant    Restaurant @relation(fields: [restaurant_id], references: [id])
+
+  subproducts Subproduct[]
+
+  @@map("subproduct_categories")
+}
+
+model ProductCategory {
+  id     String  @id @default(cuid())
+  name   String
+  status Boolean @default(true)
+
+  restaurant_id String
+  restaurant    Restaurant @relation(fields: [restaurant_id], references: [id])
+
+  products Product[]
+
+  @@map("product_categories")
+}
+
+model ComboCategory {
+  id     String  @id @default(cuid())
+  name   String
+  status Boolean @default(true)
+
+  restaurant_id String
+  restaurant    Restaurant @relation(fields: [restaurant_id], references: [id])
+
+  combos Combo[]
+
+  @@map("combo_categories")
 }
 
 model Supply {
-  id            String         @id @default(auto()) @map("_id") @db.ObjectId
-  name          String
-  taxable       Boolean        @default(true)
-  status        Boolean        @default(true)
-  presentations Presentation[]
+  id      String  @id @default(cuid())
+  name    String
+  taxable Boolean @default(true)
+  status  Boolean @default(true)
 
-  category_id String   @db.ObjectId
-  category    Category @relation(fields: [category_id], references: [id])
+  category_id String
+  category    SupplyCategory @relation(fields: [category_id], references: [id])
 
-  restaurant_id String     @db.ObjectId
+  restaurant_id String
   restaurant    Restaurant @relation(fields: [restaurant_id], references: [id])
+
+  presentations SupplyPresentation[]
 
   @@map("supplies")
 }
 
-model Presentation {
-  id     String  @id @default(auto()) @map("_id") @db.ObjectId
+model SupplyPresentation {
+  id     String  @id @default(cuid())
   name   String
   status Boolean @default(true)
   price  Float   @default(0.00)
   um     String
 
-  supply_id String @db.ObjectId
+  supply_id String
   supply    Supply @relation(fields: [supply_id], references: [id])
 
-  @@map("presentations")
+  subproducts SupplyPresentationOnSubproduct[]
+  products    SupplyPresentationOnProduct[]
+
+  @@map("supply_presentations")
 }
 
 model Subproduct {
-  id     String  @id @default(auto()) @map("_id") @db.ObjectId
+  id     String  @id @default(cuid())
   name   String
   um     String
   yield  Float   @default(1)
   status Boolean @default(true)
 
-  category_id String   @db.ObjectId
-  category    Category @relation(fields: [category_id], references: [id])
+  category_id String
+  category    SubproductCategory @relation(fields: [category_id], references: [id])
 
-  restaurant_id String     @db.ObjectId
+  restaurant_id String
   restaurant    Restaurant @relation(fields: [restaurant_id], references: [id])
+
+  supply_presentations   SupplyPresentationOnSubproduct[]
+  base_subproducts       SubproductOnSubproduct[]         @relation("base")
+  ingredient_subproducts SubproductOnSubproduct[]         @relation("ingredient")
+  products               SubproductOnProduct[]
 
   @@map("subproducts")
 }
 
 model Product {
-  id     String  @id @default(auto()) @map("_id") @db.ObjectId
+  id     String  @id @default(cuid())
   name   String
   price  Float   @default(0)
   status Boolean @default(true)
 
-  category_id String   @db.ObjectId
-  category    Category @relation(fields: [category_id], references: [id])
+  category_id String
+  category    ProductCategory @relation(fields: [category_id], references: [id])
 
-  restaurant_id String     @db.ObjectId
+  restaurant_id String
   restaurant    Restaurant @relation(fields: [restaurant_id], references: [id])
+
+  supply_presentations SupplyPresentationOnProduct[]
+  subproducts          SubproductOnProduct[]
+  combos               ProductOnCombo[]
 
   @@map("products")
 }
 
 model Combo {
-  id     String  @id @default(auto()) @map("_id") @db.ObjectId
+  id     String  @id @default(cuid())
   name   String
   price  Float   @default(0.00)
   status Boolean @default(true)
 
-  category_id String   @db.ObjectId
-  category    Category @relation(fields: [category_id], references: [id])
+  category_id String
+  category    ComboCategory @relation(fields: [category_id], references: [id])
 
-  restaurant_id String     @db.ObjectId
+  restaurant_id String
   restaurant    Restaurant @relation(fields: [restaurant_id], references: [id])
+
+  products ProductOnCombo[]
 
   @@map("combos")
 }
 
-model ProductRecipe {
-  id     String  @id @default(auto()) @map("_id") @db.ObjectId
-  amount Float @default(0.00)
-  waste Float @default(0.00)
- 
+model SupplyPresentationOnSubproduct {
+  amount Float @default(1)
+  waste  Float @default(0)
+
+  subproduct_id String
+  subproduct    Subproduct @relation(fields: [subproduct_id], references: [id])
+
+  supply_presentation_id String
+  supply_presentation    SupplyPresentation @relation(fields: [supply_presentation_id], references: [id])
+
+  @@id([supply_presentation_id, subproduct_id])
+  @@map("supply_presentations_on_subproducts")
+}
+
+model SubproductOnSubproduct {
+  amount Float @default(1)
+  waste  Float @default(0)
+
+  base_subproduct_id String
+  base_subproduct    Subproduct @relation("base", fields: [base_subproduct_id], references: [id])
+
+  ingredient_subproduct_id String
+  ingredient_subproduct    Subproduct @relation("ingredient", fields: [ingredient_subproduct_id], references: [id])
+
+  @@id([base_subproduct_id, ingredient_subproduct_id])
+  @@map("subproducts_on_subproducts")
+}
+
+model SupplyPresentationOnProduct {
+  amount Float @default(1)
+  waste  Float @default(0)
+
+  supply_presentation_id String
+  supply_presentation    SupplyPresentation @relation(fields: [supply_presentation_id], references: [id])
+
+  product_id String
+  product    Product @relation(fields: [product_id], references: [id])
+
+  @@id([supply_presentation_id, product_id])
+  @@map("supply_presentations_on_products")
+}
+
+model SubproductOnProduct {
+  amount Float @default(1)
+  waste  Float @default(0)
+
+  subproduct_id String
+  subproduct    Subproduct @relation(fields: [subproduct_id], references: [id])
+
+  product_id String
+  product    Product @relation(fields: [product_id], references: [id])
+
+  @@id([subproduct_id, product_id])
+  @@map("subproducts_on_products")
+}
+
+model ProductOnCombo {
+  amount Int @default(1)
+
+  combo_id String
+  combo    Combo  @relation(fields: [combo_id], references: [id])
+
+  product_id String
+  product    Product @relation(fields: [product_id], references: [id])
+
+  @@id([product_id, combo_id])
+  @@map("products_on_combos")
 }
