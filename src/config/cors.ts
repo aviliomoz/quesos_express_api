@@ -11,5 +11,6 @@ export const corsConfig = () => {
 
       return callback(new Error("Unauthorized origin"));
     },
+    credentials: true,
   });
 };

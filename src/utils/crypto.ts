@@ -1,10 +1,10 @@
 import bcrypt from "bcryptjs";
 
-export const hashPassword = async (password: string, salt: number = 10) => {
+export const hashPassword = (password: string, salt: number = 10) => {
   return bcrypt.hash(password, salt);
 };
 
-export const validatePassword = async (
+export const validatePassword = (
   password: string,
   hashedPassword: string
 ) => {
