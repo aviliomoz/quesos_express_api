@@ -1,37 +1,30 @@
 import { Request, Response } from "express";
-import { User } from "@prisma/client";
 import { hashPassword, validatePassword } from "../utils/crypto";
 import { createToken } from "../utils/tokens";
-import {
-  createUserHelper,
-  getUserByEmailHelper,
-} from "../helpers/auth.helpers";
+import { createUser, getUserByEmail } from "../helpers/auth.helpers";
 import { handleErrorResponse, AuthError } from "../utils/errors";
+import { NewUser, User } from "../models/users";
 
 export const signup = async (req: Request, res: Response) => {
-  const { name, email, password }: User = req.body;
+  const { name, email, password }: NewUser = req.body;
 
   try {
-    const foundUser = await getUserByEmailHelper(email);
+    const foundUser = await getUserByEmail(email);
 
     if (foundUser) throw new AuthError("User already signed up");
 
     const hashedPassword = await hashPassword(password);
 
-    const user = await createUserHelper({
-      email,
-      password: hashedPassword,
-      name,
-    });
+    const user = await createUser({ name, email, password: hashedPassword });
 
     const token = createToken({ uid: user.id });
 
-    res.cookie("token", token, {
+    return res.status(201).cookie("token", token, {
       httpOnly: true,
-    });
-
-    return res.status(201).json({
-      message: "User created",
+    }).json({
+      id: user.id,
+      name: user.name,
+      email: user.email
     });
   } catch (error) {
     return handleErrorResponse(error, res);
@@ -42,7 +35,7 @@ export const login = async (req: Request, res: Response) => {
   const { email, password }: User = req.body;
 
   try {
-    const user = await getUserByEmailHelper(email);
+    const user = await getUserByEmail(email);
 
     if (!user) throw new AuthError("Invalid credentials");
 
@@ -56,7 +49,13 @@ export const login = async (req: Request, res: Response) => {
       httpOnly: true,
     });
 
-    return res.status(200).json({ message: "User logged" });
+    return res.status(200).cookie("token", token, {
+      httpOnly: true,
+    }).json({
+      id: user.id,
+      name: user.name,
+      email: user.email
+    });
   } catch (error) {
     return handleErrorResponse(error, res);
   }

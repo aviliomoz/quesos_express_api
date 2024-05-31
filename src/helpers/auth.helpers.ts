@@ -1,17 +1,16 @@
-import { prisma } from "../libs/prisma";
-import { z } from "zod";
-import { signupSchema } from "../schemas/auth.schemas";
+import { db } from "../libs/drizzle";
+import { NewUser, User, users } from "../models/users";
+import { eq } from "drizzle-orm";
 
-export const getUserByEmailHelper = (email: string) => {
-  return prisma.user.findFirst({
-    where: {
-      email,
-    },
-  });
+export const getUserByEmail = async (email: string): Promise<User> => {
+  const res = await db.select().from(users).where(eq(users.email, email))
+
+  return res[0]
 };
 
-export const createUserHelper = (data: z.infer<typeof signupSchema>) => {
-  return prisma.user.create({
-    data,
-  });
-};
+export const createUser = async (user: NewUser): Promise<User> => {
+  const res = await db.insert(users).values(user).returning()
+
+  return res[0]
+}
+

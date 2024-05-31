@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 
 import { corsConfig } from "./config/cors";
+
 import apiRouter from "./routes/api.routes";
 
 dotenv.config({ path: ".env" });
