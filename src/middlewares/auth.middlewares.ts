@@ -8,9 +8,9 @@ export const validateToken = async (
   res: Response,
   next: NextFunction
 ) => {
+  const token: string = req.cookies.token;
+  
   try {
-    const token: string = req.cookies.token;
-
     if (!token) throw new TokenError("Token not provided");
 
     const { error, token: decoded_token } = verifyToken(token);
@@ -25,31 +25,15 @@ export const validateToken = async (
 
       // Verifica si esta a menos de dos días para expirar
       if (expiresIn - Date.now() < 60 * 60 * 24 * 2 * 1000) {
-        const newToken = createToken({ uid: decoded_token.uid });
+        const newToken = createToken(decoded_token.user);
         res.cookie("token", newToken, { httpOnly: true });
       }
 
-      (req as CustomRequest).user_id = decoded_token.uid;
+      (req as CustomRequest).user = decoded_token.user;
       next();
     } else {
       throw new TokenError("Error validating token");
     }
-  } catch (error) {
-    return handleErrorResponse(error, res);
-  }
-};
-
-export const validateAdmin = (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    const is_admin: boolean = (req as CustomRequest).is_admin;
-
-    if (!is_admin) throw new AuthError("You are not admin");
-
-    next();
   } catch (error) {
     return handleErrorResponse(error, res);
   }
