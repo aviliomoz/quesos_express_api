@@ -1,13 +1,12 @@
 import type { Request } from "express";
-import { UsuarioResponse } from "./models/usuarios";
-import { Restaurant } from "./models/restaurants";
+import { UserResponse } from "./models/users";
 
 type CustomRequest = Request & {
-  usuario: UsuarioResponse;
+  user: UserResponse;
 };
 
 type Token = {
-  usuario: UsuarioResponse;
+  user: UserResponse;
   iat: number;
   exp: number;
 };

@@ -25,11 +25,11 @@ export const validateToken = async (
 
       // Verifica si esta a menos de dos días para expirar
       if (expiresIn - Date.now() < 60 * 60 * 24 * 2 * 1000) {
-        const newToken = createToken(decoded_token.usuario);
+        const newToken = createToken(decoded_token.user);
         res.cookie("token", newToken, { httpOnly: true });
       }
 
-      (req as CustomRequest).usuario = decoded_token.usuario;
+      (req as CustomRequest).user = decoded_token.user;
       next();
     } else {
       throw new TokenError("Error validating token");

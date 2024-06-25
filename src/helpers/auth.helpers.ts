@@ -1,15 +1,15 @@
 import { db } from "../libs/drizzle";
-import { NewUsuario, Usuario, usuarios } from "../models/usuarios";
+import { NewUser, User, users } from "../models/users";
 import { eq } from "drizzle-orm";
 
-export const getUserByEmail = async (email: string): Promise<Usuario> => {
-  const res = await db.select().from(usuarios).where(eq(usuarios.email, email));
+export const getUserByEmail = async (email: string): Promise<User> => {
+  const res = await db.select().from(users).where(eq(users.email, email));
 
   return res[0] || undefined;
 };
 
-export const createUser = async (usuario: NewUsuario): Promise<Usuario> => {
-  const res = await db.insert(usuarios).values(usuario).returning();
+export const createUser = async (usuario: NewUser): Promise<User> => {
+  const res = await db.insert(users).values(usuario).returning();
 
   return res[0] || undefined;
 };

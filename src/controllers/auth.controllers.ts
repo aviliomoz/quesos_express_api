@@ -4,11 +4,11 @@ import { hashPassword, validatePassword } from "../utils/crypto";
 import { createToken } from "../utils/tokens";
 import { createUser, getUserByEmail } from "../helpers/auth.helpers";
 import { handleErrorResponse, AuthError } from "../utils/errors";
-import { NewUsuario, Usuario } from "../models/usuarios";
+import { NewUser, User } from "../models/users";
 import { Token } from "../types";
 
 export const signup = async (req: Request, res: Response) => {
-  const { nombre, email, password }: NewUsuario = req.body;
+  const { name, email, password }: NewUser = req.body;
 
   try {
     const foundUser = await getUserByEmail(email);
@@ -18,9 +18,9 @@ export const signup = async (req: Request, res: Response) => {
 
     const hashedPassword = await hashPassword(password);
 
-    const usuario = await createUser({ nombre, email, password: hashedPassword });
+    const user = await createUser({ name, email, password: hashedPassword });
 
-    const token = createToken(usuario);
+    const token = createToken(user);
 
     return res
       .status(201)
@@ -28,10 +28,10 @@ export const signup = async (req: Request, res: Response) => {
         httpOnly: true,
       })
       .json({
-        usuario: {
-          id: usuario.id,
-          nombre: usuario.nombre,
-          email: usuario.email,
+        user: {
+          id: user.id,
+          name: user.name,
+          email: user.email,
         },
       });
   } catch (error) {
@@ -40,18 +40,18 @@ export const signup = async (req: Request, res: Response) => {
 };
 
 export const login = async (req: Request, res: Response) => {
-  const { email, password }: Usuario = req.body;
+  const { email, password }: User = req.body;
 
   try {
-    const usuario = await getUserByEmail(email);
+    const user = await getUserByEmail(email);
 
-    if (!usuario) throw new AuthError("Credenciales inválidas");
+    if (!user) throw new AuthError("Credenciales inválidas");
 
-    const validPassword = await validatePassword(password, usuario.password);
+    const validPassword = await validatePassword(password, user.password);
 
     if (!validPassword) throw new AuthError("Credenciales inválidas");
 
-    const token = createToken(usuario);
+    const token = createToken(user);
 
     return res
       .status(200)
@@ -59,10 +59,10 @@ export const login = async (req: Request, res: Response) => {
         httpOnly: true,
       })
       .json({
-        usuario: {
-          id: usuario.id,
-          nombre: usuario.nombre,
-          email: usuario.email,
+        user: {
+          id: user.id,
+          name: user.name,
+          email: user.email,
         },
       });
   } catch (error) {
@@ -74,7 +74,7 @@ export const logout = (req: Request, res: Response) => {
   try {
     res.clearCookie("token");
 
-    return res.status(200).json({ usuario: undefined });
+    return res.status(200).json({ user: undefined });
   } catch (error) {
     return handleErrorResponse(error, res);
   }
@@ -83,13 +83,13 @@ export const logout = (req: Request, res: Response) => {
 export const check = (req: Request, res: Response) => {
   const token: string = req.cookies.token;
 
-  if (!token) return res.status(200).json({ usuario: undefined });
+  if (!token) return res.status(200).json({ user: undefined });
 
   try {
-    const { usuario } = jwt.decode(token) as Token;
-    if (!usuario) return res.status(200).json({ usuario: undefined });
+    const { user } = jwt.decode(token) as Token;
+    if (!user) return res.status(200).json({ user: undefined });
 
-    return res.status(200).json({ usuario });
+    return res.status(200).json({ user });
   } catch (error) {
     return handleErrorResponse(error, res);
   }
