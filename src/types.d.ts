@@ -1,20 +1,18 @@
 import type { Request } from "express";
-import { UserResponse } from "./models/users";
+import { UsuarioResponse } from "./models/usuarios";
 import { Restaurant } from "./models/restaurants";
 
 type CustomRequest = Request & {
-  user: UserResponse;
-  restaurant: Restaurant;
-  is_admin: boolean;
+  usuario: UsuarioResponse;
 };
 
 type Token = {
-  user: UserResponse;
+  usuario: UsuarioResponse;
   iat: number;
   exp: number;
 };
 
 type TokenVerification = {
-  error: null | string;
-  token: null | Token;
+  error?: string;
+  token?: Token;
 };

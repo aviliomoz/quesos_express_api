@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
 import { TokenError } from "../utils/errors";
 import { Token, TokenVerification } from "../types";
-import { User, UserResponse } from "../models/users";
+import { User, UserResponse } from "../models/usuarios";
 
 const token_expiration = 60 * 60 * 24 * 4;
 
@@ -25,7 +25,7 @@ export const verifyToken = (token: string): TokenVerification => {
   if (!token_secret)
     return {
       error: "Secret key not provided",
-      token: null,
+      token: undefined,
     };
 
   const decoded_token = jwt.verify(token, token_secret);
@@ -33,11 +33,11 @@ export const verifyToken = (token: string): TokenVerification => {
   if (!decoded_token)
     return {
       error: "Invalid or expired token",
-      token: null,
+      token: undefined,
     };
 
   return {
-    error: null,
+    error: undefined,
     token: decoded_token as Token,
   };
 };
