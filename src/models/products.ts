@@ -1,10 +1,10 @@
-import { pgTable, uuid, varchar, numeric, integer } from "drizzle-orm/pg-core";
+import { pgTable, uuid, varchar, doublePrecision } from "drizzle-orm/pg-core";
 
 export const products = pgTable("products", {
   id: uuid("id").defaultRandom().primaryKey(),
-  name: varchar("nombre").notNull(),
-  price: numeric("price").notNull(),
-  stock: integer("stock").notNull(),
+  name: varchar("name").notNull(),
+  price: doublePrecision("price").default(0.0).notNull(),
+  stock: doublePrecision("stock").default(0.0).notNull(),
 });
 
 export type Product = typeof products.$inferSelect;
