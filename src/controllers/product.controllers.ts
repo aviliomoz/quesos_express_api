@@ -4,12 +4,23 @@ import { DuplicateError, handleErrorResponse } from "../utils/errors";
 import {
   createProductHelper,
   getProductByName,
+  getProductsHelper,
 } from "../helpers/product.helpers";
 import { createStockEntryHelper } from "../helpers/stock.helpers";
 import { CustomRequest } from "../types";
 
+export const getProducts = async (req: Request, res: Response) => {
+  try {
+    const products = await getProductsHelper();
+
+    return res.status(200).json(products);
+  } catch (error) {
+    return handleErrorResponse(error, res);
+  }
+};
+
 export const createProduct = async (req: Request, res: Response) => {
-  const { name, price, stock }: NewProduct = req.body;
+  const { name, price, stock, image }: NewProduct = req.body;
 
   try {
     let product = await getProductByName(name);
@@ -17,7 +28,7 @@ export const createProduct = async (req: Request, res: Response) => {
     if (product)
       throw new DuplicateError("Ya existe un producto con el nombre ingresado");
 
-    product = await createProductHelper({ name, price, stock });
+    product = await createProductHelper({ name, price, stock, image });
 
     const entry = await createStockEntryHelper({
       user_id: (req as CustomRequest).user.id,
