@@ -1,8 +1,8 @@
 import { db } from "../libs/drizzle";
-import { NewStockEntry, stockEntries } from "../models/stockEntries";
+import { NewMovement, movements } from "../models/movements";
 
-export const createStockEntryHelper = async (entry: NewStockEntry) => {
-  const res = await db.insert(stockEntries).values(entry).returning();
+export const createMovementHelper = async (movement: NewMovement) => {
+  const res = await db.insert(movements).values(movement).returning();
 
   return res[0] || undefined;
 };

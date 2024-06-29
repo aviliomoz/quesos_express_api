@@ -1,0 +1,1 @@
+ALTER TABLE "products" ADD COLUMN "cost" double precision DEFAULT 0 NOT NULL;

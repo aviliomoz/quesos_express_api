@@ -1,4 +1,4 @@
-import { pgTable, uuid, numeric, varchar, integer } from "drizzle-orm/pg-core";
+import { pgTable, uuid, numeric, varchar, integer, doublePrecision } from "drizzle-orm/pg-core";
 import { sales } from "./sales";
 import { products } from "./products";
 
@@ -10,11 +10,11 @@ export const saleDetails = pgTable("sale_details", {
   product_id: uuid("product_id")
     .notNull()
     .references(() => products.id),
-  amount: integer("amount").notNull(),
-  price: numeric("price").notNull(),
-  discount: numeric("discount"),
+  amount: doublePrecision("amount").notNull(),
+  price: doublePrecision("price").notNull(),
+  discount: doublePrecision("discount"),
   discountDescription: varchar("discount_description"),
-  total: numeric("total").notNull(),
+  total: doublePrecision("total").notNull(),
 });
 
 export type SaleDetail = typeof saleDetails.$inferSelect;

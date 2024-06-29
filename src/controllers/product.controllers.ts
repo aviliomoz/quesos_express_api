@@ -6,7 +6,7 @@ import {
   getProductByName,
   getProductsHelper,
 } from "../helpers/product.helpers";
-import { createStockEntryHelper } from "../helpers/stock.helpers";
+import { createMovementHelper } from "../helpers/stock.helpers";
 import { CustomRequest } from "../types";
 
 export const getProducts = async (req: Request, res: Response) => {
@@ -30,12 +30,14 @@ export const createProduct = async (req: Request, res: Response) => {
 
     product = await createProductHelper({ name, price, stock, image });
 
-    const entry = await createStockEntryHelper({
+    const entry = await createMovementHelper({
+      type: "entry",
       user_id: (req as CustomRequest).user.id,
       product_id: product.id,
       amount: product.stock,
-      date: new Date().toISOString(),
+      date: new Date(),
       description: "Entrada por apertura de stock",
+      stock: product.stock,
     });
 
     return res.status(201).json({ product, entry });
