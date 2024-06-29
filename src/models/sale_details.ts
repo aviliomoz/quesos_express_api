@@ -1,8 +1,8 @@
-import { pgTable, uuid, numeric, varchar, integer, doublePrecision } from "drizzle-orm/pg-core";
+import { pgTable, uuid, varchar, doublePrecision } from "drizzle-orm/pg-core";
 import { sales } from "./sales";
 import { products } from "./products";
 
-export const saleDetails = pgTable("sale_details", {
+export const sale_details = pgTable("sale_details", {
   id: uuid("id").defaultRandom().primaryKey(),
   sale_id: uuid("sale_id")
     .notNull()
@@ -17,5 +17,5 @@ export const saleDetails = pgTable("sale_details", {
   total: doublePrecision("total").notNull(),
 });
 
-export type SaleDetail = typeof saleDetails.$inferSelect;
-export type NewSaleDetail = typeof saleDetails.$inferInsert;
+export type SaleDetail = typeof sale_details.$inferSelect;
+export type NewSaleDetail = typeof sale_details.$inferInsert;

@@ -57,6 +57,13 @@
       "when": 1719636158481,
       "tag": "0007_robust_red_skull",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "6",
+      "when": 1719684292232,
+      "tag": "0008_familiar_chat",
+      "breakpoints": true
     }
   ]
 }

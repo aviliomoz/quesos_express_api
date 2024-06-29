@@ -22,6 +22,7 @@ export const sales = pgTable("sales", {
   user_id: uuid("user_id")
     .notNull()
     .references(() => users.id),
+  status: boolean("status").default(true).notNull(),
 });
 
 export type Sale = typeof sales.$inferSelect;
