@@ -64,6 +64,13 @@
       "when": 1719684292232,
       "tag": "0008_familiar_chat",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "6",
+      "when": 1719703861137,
+      "tag": "0009_many_doctor_faustus",
+      "breakpoints": true
     }
   ]
 }

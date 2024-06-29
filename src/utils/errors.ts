@@ -24,6 +24,12 @@ export class RequestError extends Error {
   }
 }
 
+export class NotFoundError extends Error {
+  constructor(message: string) {
+    super(message);
+  }
+}
+
 export const handleErrorResponse = (error: unknown, res: Response) => {
   if (error instanceof TokenError)
     return res
@@ -44,6 +50,11 @@ export const handleErrorResponse = (error: unknown, res: Response) => {
     return res
       .status(400)
       .json({ message: "Bad request error", error: error.message });
+
+  if (error instanceof NotFoundError)
+    return res
+      .status(404)
+      .json({ message: "Not found error", error: error.message });
 
   if (error instanceof Error)
     return res
