@@ -57,7 +57,7 @@ export const login = async (req: Request, res: Response) => {
       .status(200)
       .cookie("token", token, {
         httpOnly: true,
-        domain: "https://quesos-express-api.onrender.com",
+        domain: process.env.WEB_APP_ORIGIN,
         secure: process.env.NODE_ENV === "production",
         sameSite: "lax",
       })
