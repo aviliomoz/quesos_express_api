@@ -1,4 +1,11 @@
-import { pgTable, uuid, varchar, pgEnum, timestamp } from "drizzle-orm/pg-core";
+import {
+  pgTable,
+  uuid,
+  varchar,
+  pgEnum,
+  timestamp,
+  boolean,
+} from "drizzle-orm/pg-core";
 import { users } from "./users";
 
 export const movementTypeEnum = pgEnum("movementTypeEnum", ["entry", "output"]);
@@ -11,6 +18,7 @@ export const movements = pgTable("movements", {
   user_id: uuid("user_id")
     .notNull()
     .references(() => users.id),
+  status: boolean("status").default(true).notNull(),
 });
 
 export type Movement = typeof movements.$inferSelect;
