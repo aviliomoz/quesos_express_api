@@ -1,0 +1,1 @@
+ALTER TABLE "movements" ADD COLUMN "status" boolean DEFAULT true NOT NULL;
