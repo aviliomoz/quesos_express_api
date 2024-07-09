@@ -1,6 +1,6 @@
-import { eq } from "drizzle-orm";
+import { count, eq, ilike } from "drizzle-orm";
 import { db } from "../libs/drizzle";
-import { NewProduct, Product, products } from "../models/products";
+import { NewProduct, products } from "../models/products";
 
 export const getProductByName = async (name: string) => {
   const res = await db.select().from(products).where(eq(products.name, name));
@@ -14,10 +14,26 @@ export const getProductById = async (id: string) => {
   return res[0] || undefined;
 };
 
-export const getProductsHelper = async () => {
-  const res = await db.select().from(products);
+export const getProductsHelper = async (
+  search: string,
+  limit: number,
+  offset: number
+) => {
+  const [res, [{ c }]] = await Promise.all([
+    db
+      .select()
+      .from(products)
+      .limit(limit)
+      .offset(offset)
+      .where(ilike(products.name, `%${search}%`))
+      .orderBy(products.name),
+    db
+      .select({ c: count() })
+      .from(products)
+      .where(ilike(products.name, `%${search}%`)),
+  ]);
 
-  return res;
+  return { products: res, count: c };
 };
 
 export const createProductHelper = async (product: NewProduct) => {

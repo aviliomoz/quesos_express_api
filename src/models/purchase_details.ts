@@ -14,7 +14,6 @@ export const purchase_details = pgTable("purchase_details", {
   price: doublePrecision("price").notNull(),
   discount: doublePrecision("discount").notNull(),
   discount_description: varchar("discount_description").notNull(),
-  total: doublePrecision("total").notNull(),
 });
 
 // Tipos inferidos para purchase_details

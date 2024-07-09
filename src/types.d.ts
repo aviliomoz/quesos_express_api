@@ -1,5 +1,5 @@
 import type { Request } from "express";
-import { UserResponse } from "./models/users";
+import type { UserResponse } from "./models/users";
 
 type CustomRequest = Request & {
   user: UserResponse;
@@ -12,6 +12,12 @@ type Token = {
 };
 
 type TokenVerification = {
-  error?: string;
-  token?: Token;
+  error: string | null;
+  token: Token | null;
+};
+
+type ErrorResponse = {
+  status: number;
+  code: string;
+  details: string;
 };

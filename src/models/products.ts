@@ -11,8 +11,8 @@ export const products = pgTable("products", {
   name: varchar("name").notNull(),
   price: doublePrecision("price").default(0.0).notNull(),
   cost: doublePrecision("cost").default(0.0).notNull(),
-  stock: doublePrecision("stock").default(0.0).notNull(),
   status: boolean("status").default(true).notNull(),
+  initial_stock: doublePrecision("initial_stock").default(0).notNull(),
 });
 
 export type Product = typeof products.$inferSelect;

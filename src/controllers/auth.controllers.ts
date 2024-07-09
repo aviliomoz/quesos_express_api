@@ -3,7 +3,7 @@ import { Request, Response } from "express";
 import { hashPassword, validatePassword } from "../utils/crypto";
 import { createToken } from "../utils/tokens";
 import { createUser, getUserByEmail } from "../helpers/auth.helpers";
-import { handleErrorResponse, AuthError } from "../utils/errors";
+import { getErrorResponse, AuthError } from "../utils/errors";
 import { NewUser, User } from "../models/users";
 import { Token } from "../types";
 
@@ -28,14 +28,26 @@ export const signup = async (req: Request, res: Response) => {
         httpOnly: true,
       })
       .json({
-        user: {
-          id: user.id,
-          name: user.name,
-          email: user.email,
+        ok: true,
+        message: "Usuario registrado correctamente",
+        error: null,
+        data: {
+          user: {
+            id: user.id,
+            name: user.name,
+            email: user.email,
+          },
         },
       });
   } catch (error) {
-    return handleErrorResponse(error, res);
+    const { status, code, details } = getErrorResponse(error);
+
+    return res.status(status).json({
+      ok: false,
+      message: "Error al registrar usuario",
+      error: { code, details },
+      data: null,
+    });
   }
 };
 
@@ -59,14 +71,26 @@ export const login = async (req: Request, res: Response) => {
         httpOnly: true,
       })
       .json({
-        user: {
-          id: user.id,
-          name: user.name,
-          email: user.email,
+        ok: true,
+        message: "Inicio de sesión exitoso",
+        error: null,
+        data: {
+          user: {
+            id: user.id,
+            name: user.name,
+            email: user.email,
+          },
         },
       });
   } catch (error) {
-    return handleErrorResponse(error, res);
+    const { status, code, details } = getErrorResponse(error);
+
+    return res.status(status).json({
+      ok: false,
+      message: "Error al iniciar sesión",
+      error: { code, details },
+      data: null,
+    });
   }
 };
 
@@ -74,23 +98,47 @@ export const logout = (req: Request, res: Response) => {
   try {
     res.clearCookie("token");
 
-    return res.status(200).json({ user: undefined });
+    return res.status(200).json({
+      ok: true,
+      message: "Se ha cerrado la sesión",
+      error: null,
+      data: null,
+    });
   } catch (error) {
-    return handleErrorResponse(error, res);
+    const { status, code, details } = getErrorResponse(error);
+
+    return res.status(status).json({
+      ok: false,
+      messages: ["Error al cerrar sesión"],
+      error: { code, details },
+      data: null,
+    });
   }
 };
 
 export const check = (req: Request, res: Response) => {
   const token: string = req.cookies.token;
 
-  if (!token) return res.status(200).json({ user: undefined });
+  if (!token) throw new AuthError("Token no encontrado");
 
   try {
     const { user } = jwt.decode(token) as Token;
-    if (!user) return res.status(200).json({ user: undefined });
+    if (!user) throw new AuthError("Usuario no encontrado");
 
-    return res.status(200).json({ user });
+    return res.status(200).json({
+      ok: true,
+      message: "Sesión verificada",
+      error: null,
+      data: { user },
+    });
   } catch (error) {
-    return handleErrorResponse(error, res);
+    const { status, code, details } = getErrorResponse(error);
+
+    return res.status(status).json({
+      ok: false,
+      message: "No se pudo verificar la sesión",
+      error: { code, details },
+      data: null,
+    });
   }
 };

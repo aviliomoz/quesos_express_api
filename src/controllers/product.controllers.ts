@@ -3,7 +3,7 @@ import { NewProduct, Product } from "../models/products";
 import {
   DuplicateError,
   NotFoundError,
-  handleErrorResponse,
+  getErrorResponse,
 } from "../utils/errors";
 import {
   createProductHelper,
@@ -13,21 +13,42 @@ import {
   updateProductHelper,
   toggleProductHelper,
 } from "../helpers/product.helpers";
-import { createMovementHelper } from "../helpers/movement.helpers";
-import { CustomRequest } from "../types";
 
 export const getProducts = async (req: Request, res: Response) => {
-  try {
-    const products = await getProductsHelper();
+  const search = (req.query.search as string) || "";
+  const page = parseInt(req.query.page as string) || 1;
+  const limit = parseInt(req.query.limit as string) || 10;
+  const offset = (page - 1) * limit;
 
-    return res.status(200).json({ products });
+  try {
+    const { products, count } = await getProductsHelper(search, limit, offset);
+
+    return res.status(200).json({
+      ok: true,
+      message: "Listado de productos",
+      error: null,
+      data: {
+        products,
+      },
+      meta: {
+        count,
+        pages: Math.ceil(count / limit),
+      },
+    });
   } catch (error) {
-    return handleErrorResponse(error, res);
+    const { status, code, details } = getErrorResponse(error);
+
+    return res.status(status).json({
+      ok: false,
+      message: "Error al cargar productos",
+      error: { code, details },
+      data: null,
+    });
   }
 };
 
 export const createProduct = async (req: Request, res: Response) => {
-  const { name, price, stock, cost }: NewProduct = req.body;
+  const { name, price, initial_stock, cost }: NewProduct = req.body;
 
   try {
     let product = await getProductByName(name);
@@ -35,27 +56,29 @@ export const createProduct = async (req: Request, res: Response) => {
     if (product)
       throw new DuplicateError("Ya existe un producto con el nombre ingresado");
 
-    product = await createProductHelper({ name, price, stock, cost });
+    product = await createProductHelper({ name, price, initial_stock, cost });
 
-    const entry = await createMovementHelper({
-      type: "entry",
-      user_id: (req as CustomRequest).user.id,
-      product_id: product.id,
-      amount: product.stock,
-      date: new Date(),
-      description: "Entrada por apertura de stock",
-      stock: product.stock,
+    return res.status(201).json({
+      ok: true,
+      message: "Producto creado exitosamente",
+      error: null,
+      data: { product },
     });
-
-    return res.status(201).json({ product, entry });
   } catch (error) {
-    return handleErrorResponse(error, res);
+    const { status, code, details } = getErrorResponse(error);
+
+    return res.status(status).json({
+      ok: false,
+      message: "Error al crear producto",
+      error: { code, details },
+      data: null,
+    });
   }
 };
 
 export const updateProduct = async (req: Request, res: Response) => {
   const { id } = req.params;
-  const { name, price, stock, cost }: Product = req.body;
+  const { name, price, initial_stock, cost }: Product = req.body;
 
   try {
     let product = await getProductById(id);
@@ -65,13 +88,25 @@ export const updateProduct = async (req: Request, res: Response) => {
     product = await updateProductHelper(id, {
       name,
       price,
-      stock,
+      initial_stock,
       cost,
     });
 
-    return res.status(200).json({ product });
+    return res.status(200).json({
+      ok: true,
+      message: "Producto modificado exitosamente",
+      error: null,
+      data: { product },
+    });
   } catch (error) {
-    return handleErrorResponse(error, res);
+    const { status, code, details } = getErrorResponse(error);
+
+    return res.status(status).json({
+      ok: false,
+      message: "Error al modificar producto",
+      error: { code, details },
+      data: null,
+    });
   }
 };
 
@@ -85,8 +120,20 @@ export const toggleProduct = async (req: Request, res: Response) => {
 
     product = await toggleProductHelper(id);
 
-    return res.status(200).json({ product });
+    return res.status(200).json({
+      ok: true,
+      message: "Producto modificado exitosamente",
+      error: null,
+      data: { product },
+    });
   } catch (error) {
-    return handleErrorResponse(error, res);
+    const { status, code, details } = getErrorResponse(error);
+
+    return res.status(status).json({
+      ok: false,
+      message: "Error al modificar producto",
+      error: { code, details },
+      data: null,
+    });
   }
 };

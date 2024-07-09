@@ -11,7 +11,6 @@ export const purchases = pgTable("purchases", {
   supplier_id: uuid("supplier_id")
     .notNull()
     .references(() => suppliers.id),
-  total: doublePrecision("total").notNull(),
 });
 
 // Tipos inferidos para purchases

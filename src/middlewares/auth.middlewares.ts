@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { CustomRequest } from "../types";
 import { verifyToken, createToken } from "../utils/tokens";
-import { handleErrorResponse, TokenError } from "../utils/errors";
+import { getErrorResponse, TokenError } from "../utils/errors";
 
 export const validateToken = async (
   req: Request,
@@ -35,6 +35,13 @@ export const validateToken = async (
       throw new TokenError("Error validating token");
     }
   } catch (error) {
-    return handleErrorResponse(error, res);
+    const { status, code, details } = getErrorResponse(error);
+
+    return res.status(status).json({
+      ok: false,
+      message: "Error al validar token",
+      error: { code, details },
+      data: null,
+    });
   }
 };

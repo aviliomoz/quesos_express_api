@@ -13,8 +13,7 @@ export const sale_details = pgTable("sale_details", {
   amount: doublePrecision("amount").notNull(),
   price: doublePrecision("price").notNull(),
   discount: doublePrecision("discount"),
-  discountDescription: varchar("discount_description"),
-  total: doublePrecision("total").notNull(),
+  discount_description: varchar("discount_description"),
 });
 
 export type SaleDetail = typeof sale_details.$inferSelect;

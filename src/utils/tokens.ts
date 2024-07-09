@@ -25,7 +25,7 @@ export const verifyToken = (token: string): TokenVerification => {
   if (!token_secret)
     return {
       error: "Secret key not provided",
-      token: undefined,
+      token: null,
     };
 
   const decoded_token = jwt.verify(token, token_secret);
@@ -33,11 +33,11 @@ export const verifyToken = (token: string): TokenVerification => {
   if (!decoded_token)
     return {
       error: "Invalid or expired token",
-      token: undefined,
+      token: null,
     };
 
   return {
-    error: undefined,
+    error: null,
     token: decoded_token as Token,
   };
 };
