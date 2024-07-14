@@ -4,7 +4,7 @@ import { suppliers } from "./suppliers";
 
 export const purchases = pgTable("purchases", {
   id: uuid("id").defaultRandom().primaryKey(),
-  timestamp: timestamp("timestamp").notNull(),
+  date: timestamp("date").notNull(),
   user_id: uuid("user_id")
     .notNull()
     .references(() => users.id),

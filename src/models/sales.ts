@@ -13,7 +13,7 @@ export const sales = pgTable("sales", {
   customer_id: uuid("customer_id")
     .notNull()
     .references(() => customers.id),
-  order_date: timestamp("order_date").notNull(),
+  date: timestamp("date").notNull(),
   delivery_date: timestamp("delivery_date"),
   payment_date: timestamp("payment_date"),
   delivered: boolean("delivered").notNull().default(false),
