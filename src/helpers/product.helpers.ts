@@ -5,13 +5,13 @@ import { NewProduct, products } from "../models/products";
 export const getProductByName = async (name: string) => {
   const res = await db.select().from(products).where(eq(products.name, name));
 
-  return res[0] || undefined;
+  return res[0];
 };
 
 export const getProductById = async (id: string) => {
   const res = await db.select().from(products).where(eq(products.id, id));
 
-  return res[0] || undefined;
+  return res[0];
 };
 
 export const getProductsHelper = async (
@@ -39,7 +39,7 @@ export const getProductsHelper = async (
 export const createProductHelper = async (product: NewProduct) => {
   const res = await db.insert(products).values(product).returning();
 
-  return res[0] || undefined;
+  return res[0];
 };
 
 export const updateProductHelper = async (id: string, product: NewProduct) => {
