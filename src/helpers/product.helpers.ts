@@ -54,13 +54,3 @@ export const updateProductHelper = async (id: string, product: NewProduct) => {
 
   return res[0];
 };
-
-export const toggleProductHelper = async (id: string) => {
-  const res = await db
-    .update(products)
-    .set({ status: !products.status })
-    .where(eq(products.id, id))
-    .returning();
-
-  return res[0];
-};

@@ -9,17 +9,18 @@ import { Token } from "../types";
 import { sendErrorResponse, sendSuccessResponse } from "../utils/responses";
 
 export const signup = async (req: Request, res: Response) => {
-  const { name, email, password }: NewUser = req.body;
+  const data = req.body as NewUser;
 
   try {
-    const foundUser = await getUserByEmail(email);
+    const foundUser = await getUserByEmail(data.email);
 
     if (foundUser)
       throw new AuthError("El correo ingresado ya se encuentra registrado");
 
-    const hashedPassword = await hashPassword(password);
+    const hashedPassword = await hashPassword(data.password);
+    data.password = hashedPassword;
 
-    const user = await createUser({ name, email, password: hashedPassword });
+    const user = await createUser(data);
 
     const token = createToken(user);
 
@@ -38,14 +39,14 @@ export const signup = async (req: Request, res: Response) => {
 };
 
 export const login = async (req: Request, res: Response) => {
-  const { email, password }: User = req.body;
+  const data = req.body as NewUser;
 
   try {
-    const user = await getUserByEmail(email);
+    const user = await getUserByEmail(data.email);
 
     if (!user) throw new AuthError("Credenciales inválidas");
 
-    const validPassword = await validatePassword(password, user.password);
+    const validPassword = await validatePassword(data.password, user.password);
 
     if (!validPassword) throw new AuthError("Credenciales inválidas");
 

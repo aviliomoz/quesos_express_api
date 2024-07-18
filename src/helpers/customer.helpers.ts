@@ -57,13 +57,3 @@ export const updateCustomerHelper = async (
 
   return res[0];
 };
-
-export const toggleCustomerHelper = async (id: string) => {
-  const res = await db
-    .update(customers)
-    .set({ status: !customers.status })
-    .where(eq(customers.id, id))
-    .returning();
-
-  return res[0];
-};
