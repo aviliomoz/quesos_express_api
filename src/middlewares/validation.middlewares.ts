@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from "express";
-import { ZodError, ZodSchema } from "zod";
+import { ZodSchema } from "zod";
+import { sendErrorResponse } from "../utils/responses";
 
 export const validateSchema = (schema: ZodSchema) => {
   return (req: Request, res: Response, next: NextFunction) => {
@@ -7,8 +8,7 @@ export const validateSchema = (schema: ZodSchema) => {
       schema.parse(req.body);
       next();
     } catch (error) {
-      error instanceof ZodError &&
-        res.status(400).json({ error: error.errors[0].message });
+      return sendErrorResponse(res, error, "Error de validación");
     }
   };
 };

@@ -16,7 +16,7 @@ type TokenVerification = {
   token: Token | null;
 };
 
-type ErrorResponse = {
+type ErrorInfo = {
   status: number;
   code: string;
   details: string;

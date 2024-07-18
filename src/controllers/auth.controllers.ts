@@ -3,9 +3,10 @@ import { Request, Response } from "express";
 import { hashPassword, validatePassword } from "../utils/crypto";
 import { createToken } from "../utils/tokens";
 import { createUser, getUserByEmail } from "../helpers/auth.helpers";
-import { getErrorResponse, AuthError } from "../utils/errors";
+import { AuthError } from "../utils/errors";
 import { NewUser, User } from "../models/users";
 import { Token } from "../types";
+import { sendErrorResponse, sendSuccessResponse } from "../utils/responses";
 
 export const signup = async (req: Request, res: Response) => {
   const { name, email, password }: NewUser = req.body;
@@ -22,32 +23,17 @@ export const signup = async (req: Request, res: Response) => {
 
     const token = createToken(user);
 
-    return res
-      .status(201)
-      .cookie("token", token, {
-        httpOnly: true,
-      })
-      .json({
-        ok: true,
-        message: "Usuario registrado correctamente",
-        error: null,
-        data: {
-          user: {
-            id: user.id,
-            name: user.name,
-            email: user.email,
-          },
-        },
-      });
-  } catch (error) {
-    const { status, code, details } = getErrorResponse(error);
-
-    return res.status(status).json({
-      ok: false,
-      message: "Error al registrar usuario",
-      error: { code, details },
-      data: null,
+    res.cookie("token", token, {
+      httpOnly: true,
     });
+
+    return sendSuccessResponse(res, 201, "Usuario registrado correctamente", {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+    });
+  } catch (error) {
+    return sendErrorResponse(res, error, "Error al registrar usuario");
   }
 };
 
@@ -65,80 +51,40 @@ export const login = async (req: Request, res: Response) => {
 
     const token = createToken(user);
 
-    return res
-      .status(200)
-      .cookie("token", token, {
-        httpOnly: true,
-      })
-      .json({
-        ok: true,
-        message: "Inicio de sesión exitoso",
-        error: null,
-        data: {
-          user: {
-            id: user.id,
-            name: user.name,
-            email: user.email,
-          },
-        },
-      });
-  } catch (error) {
-    const { status, code, details } = getErrorResponse(error);
-
-    return res.status(status).json({
-      ok: false,
-      message: "Error al iniciar sesión",
-      error: { code, details },
-      data: null,
+    res.cookie("token", token, {
+      httpOnly: true,
     });
+
+    return sendSuccessResponse(res, 200, "Inicio de sesión exitoso", {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+    });
+  } catch (error) {
+    return sendErrorResponse(res, error, "Error al iniciar sesión");
   }
 };
 
 export const logout = (req: Request, res: Response) => {
   try {
     res.clearCookie("token");
-
-    return res.status(200).json({
-      ok: true,
-      message: "Se ha cerrado la sesión",
-      error: null,
-      data: null,
-    });
+    return sendSuccessResponse(res, 200, "Se ha cerrado la sesión", null);
   } catch (error) {
-    const { status, code, details } = getErrorResponse(error);
-
-    return res.status(status).json({
-      ok: false,
-      messages: ["Error al cerrar sesión"],
-      error: { code, details },
-      data: null,
-    });
+    return sendErrorResponse(res, error, "Error al cerrar sesión");
   }
 };
 
 export const check = (req: Request, res: Response) => {
-  const token: string = req.cookies.token;
-
-  if (!token) throw new AuthError("Token no encontrado");
+  const token = req.cookies.token as string;
 
   try {
+    if (!token) throw new AuthError("Token no encontrado");
+
     const { user } = jwt.decode(token) as Token;
     if (!user) throw new AuthError("Usuario no encontrado");
 
-    return res.status(200).json({
-      ok: true,
-      message: "Sesión verificada",
-      error: null,
-      data: { user },
-    });
+    return sendSuccessResponse(res, 200, "Sesión verificada", user);
   } catch (error) {
-    const { status, code, details } = getErrorResponse(error);
-
-    return res.status(status).json({
-      ok: false,
-      message: "No se pudo verificar la sesión",
-      error: { code, details },
-      data: null,
-    });
+    return sendErrorResponse(res, error, "No se pudo verificar la sesión");
   }
 };
