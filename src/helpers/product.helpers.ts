@@ -3,24 +3,27 @@ import { db } from "../libs/drizzle";
 import { NewProduct, products } from "../models/products";
 
 export const getProductByNameHelper = async (name: string) => {
-  const res = await db.select().from(products).where(eq(products.name, name));
+  const result = await db
+    .select()
+    .from(products)
+    .where(eq(products.name, name));
 
-  return res[0];
+  return result[0];
 };
 
 export const getProductByIdHelper = async (id: string) => {
-  const res = await db.select().from(products).where(eq(products.id, id));
+  const result = await db.select().from(products).where(eq(products.id, id));
 
-  return res[0];
+  return result[0];
 };
 
 export const getProductsCountHelper = async (filter: { search: string }) => {
-  const res = await db
+  const result = await db
     .select({ count: count() })
     .from(products)
     .where(ilike(products.name, `%${filter.search}%`));
 
-  return res[0].count;
+  return result[0].count;
 };
 
 export const getProductsHelper = async (filter: {
@@ -28,7 +31,7 @@ export const getProductsHelper = async (filter: {
   limit: number;
   offset: number;
 }) => {
-  const res = await db
+  const result = await db
     .select()
     .from(products)
     .limit(filter.limit)
@@ -36,21 +39,21 @@ export const getProductsHelper = async (filter: {
     .where(ilike(products.name, `%${filter.search}%`))
     .orderBy(products.name);
 
-  return res;
+  return result;
 };
 
 export const createProductHelper = async (product: NewProduct) => {
-  const res = await db.insert(products).values(product).returning();
+  const result = await db.insert(products).values(product).returning();
 
-  return res[0];
+  return result[0];
 };
 
 export const updateProductHelper = async (id: string, product: NewProduct) => {
-  const res = await db
+  const result = await db
     .update(products)
     .set(product)
     .where(eq(products.id, id))
     .returning();
 
-  return res[0];
+  return result[0];
 };

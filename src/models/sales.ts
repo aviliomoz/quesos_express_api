@@ -1,6 +1,12 @@
-import { pgTable, uuid, boolean, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, uuid, boolean, timestamp, pgEnum } from "drizzle-orm/pg-core";
 import { customers } from "./customers";
 import { users } from "./users";
+
+export const saleStatusEnum = pgEnum("saleStatusEnum", [
+  "pending",
+  "completed",
+  "deleted",
+]);
 
 export const sales = pgTable("sales", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -15,7 +21,7 @@ export const sales = pgTable("sales", {
   user_id: uuid("user_id")
     .notNull()
     .references(() => users.id),
-  status: boolean("status").default(true).notNull(),
+  status: saleStatusEnum("status").default("pending").notNull(),
 });
 
 export type Sale = typeof sales.$inferSelect;
