@@ -29,7 +29,7 @@ export const getProducts = async (req: Request, res: Response) => {
 
     return sendSuccessResponse(res, 200, "Listado de productos", products, {
       count,
-      pages: Math.ceil(count / limit),
+      pages: Math.ceil(count / limit) || 0,
     });
   } catch (error) {
     return sendErrorResponse(res, error, "Error al cargar productos");

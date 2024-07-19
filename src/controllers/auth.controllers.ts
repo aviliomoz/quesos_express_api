@@ -4,7 +4,7 @@ import { hashPassword, validatePassword } from "../utils/crypto";
 import { createToken } from "../utils/tokens";
 import { createUser, getUserByEmail } from "../helpers/auth.helpers";
 import { AuthError } from "../utils/errors";
-import { NewUser, User } from "../models/users";
+import { NewUser } from "../models/users";
 import { Token } from "../types";
 import { sendErrorResponse, sendSuccessResponse } from "../utils/responses";
 

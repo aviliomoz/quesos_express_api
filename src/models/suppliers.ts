@@ -4,8 +4,8 @@ export const suppliers = pgTable("suppliers", {
   id: uuid("id").defaultRandom().primaryKey(),
   ruc: varchar("ruc").notNull(),
   name: varchar("name").notNull(),
-  phone: varchar("phone").notNull(),
-  status: boolean("status").notNull(),
+  phone: varchar("phone"),
+  status: boolean("status").default(true).notNull(),
 });
 
 // Tipos inferidos para suppliers
