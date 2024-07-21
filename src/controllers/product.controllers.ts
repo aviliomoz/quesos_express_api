@@ -10,18 +10,22 @@ import {
   getProductsCountHelper,
 } from "../helpers/product.helpers";
 import { sendErrorResponse, sendSuccessResponse } from "../utils/responses";
+import { validateStatus } from "../utils/validations";
 
 export const getProducts = async (req: Request, res: Response) => {
-  const search = (req.query.search as string) || "";
+  const status = validateStatus(req.query.status) || undefined;
+  const search = (req.query.search as string) || undefined;
+
   const page = parseInt(req.query.page as string);
 
-  const count = await getProductsCountHelper({ search });
+  const count = await getProductsCountHelper({ search, status });
 
   const limit = page ? 10 : parseInt(req.query.limit as string) || count;
   const offset = page ? (page - 1) * limit : 0;
 
   try {
     const products = await getProductsHelper({
+      status,
       search,
       limit,
       offset,
@@ -33,6 +37,18 @@ export const getProducts = async (req: Request, res: Response) => {
     });
   } catch (error) {
     return sendErrorResponse(res, error, "Error al cargar productos");
+  }
+};
+
+export const getProductById = async (req: Request, res: Response) => {
+  const { id } = req.params;
+
+  try {
+    const product = await getProductByIdHelper(id);
+
+    return sendSuccessResponse(res, 200, "Producto encontrado", product);
+  } catch (error) {
+    return sendErrorResponse(res, error, "Error al cargar el producto");
   }
 };
 

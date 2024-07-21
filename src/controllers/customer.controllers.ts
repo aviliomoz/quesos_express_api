@@ -10,9 +10,12 @@ import {
 import { sendErrorResponse, sendSuccessResponse } from "../utils/responses";
 import { NewCustomer } from "../models/customers";
 import { DuplicateError, NotFoundError } from "../utils/errors";
+import { validateStatus } from "../utils/validations";
 
 export const getCustomers = async (req: Request, res: Response) => {
-  const search = (req.query.search as string) || "";
+  const status = validateStatus(req.query.status) || undefined;
+  const search = (req.query.search as string) || undefined;
+
   const page = parseInt(req.query.page as string);
 
   const count = await getCustomersCountHelper({ search });
@@ -21,7 +24,12 @@ export const getCustomers = async (req: Request, res: Response) => {
   const offset = page ? (page - 1) * limit : 0;
 
   try {
-    const customers = await getCustomersHelper(search, limit, offset);
+    const customers = await getCustomersHelper({
+      status,
+      search,
+      limit,
+      offset,
+    });
 
     return sendSuccessResponse(res, 200, "Listado de clientes", customers, {
       count,
@@ -29,6 +37,18 @@ export const getCustomers = async (req: Request, res: Response) => {
     });
   } catch (error) {
     return sendErrorResponse(res, error, "Error al obtener los clientes");
+  }
+};
+
+export const getCustomerById = async (req: Request, res: Response) => {
+  const { id } = req.params;
+
+  try {
+    const customer = await getCustomerByIdHelper(id);
+
+    return sendSuccessResponse(res, 200, "Cliente encontrado", customer);
+  } catch (error) {
+    return sendErrorResponse(res, error, "Error al obtener el cliente");
   }
 };
 

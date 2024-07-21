@@ -1,6 +1,7 @@
 import { count, eq, ilike } from "drizzle-orm";
 import { db } from "../libs/drizzle";
 import { customers, NewCustomer } from "../models/customers";
+import { Status } from "../types";
 
 export const getCustomerByNameHelper = async (name: string) => {
   const result = await db
@@ -17,27 +18,54 @@ export const getCustomerByIdHelper = async (id: string) => {
   return result[0];
 };
 
-export const getCustomersCountHelper = async (filter: { search: string }) => {
-  const result = await db
-    .select({ count: count() })
-    .from(customers)
-    .where(ilike(customers.name, `%${filter.search}%`));
+export const getCustomersCountHelper = async (filter?: {
+  status?: Status;
+  search?: string;
+}) => {
+  let query = db.select({ count: count() }).from(customers).$dynamic();
+
+  if (filter) {
+    if (filter.status) {
+      query = query.where(eq(customers.status, filter.status));
+    }
+
+    if (filter.search) {
+      query = query.where(ilike(customers.name, `%${filter.search}%`));
+    }
+  }
+
+  const result = await query.execute();
 
   return result[0].count;
 };
 
-export const getCustomersHelper = async (
-  search: string,
-  limit: number,
-  offset: number
-) => {
-  const result = await db
-    .select()
-    .from(customers)
-    .limit(limit)
-    .offset(offset)
-    .where(ilike(customers.name, `%${search}%`))
-    .orderBy(customers.name);
+export const getCustomersHelper = async (filter?: {
+  status?: Status;
+  search?: string;
+  limit?: number;
+  offset?: number;
+}) => {
+  let query = db.select().from(customers).$dynamic();
+
+  if (filter) {
+    if (filter.status) {
+      query = query.where(eq(customers.status, filter.status));
+    }
+
+    if (filter.search) {
+      query = query.where(ilike(customers.name, `%${filter.search}`));
+    }
+
+    if (filter.limit) {
+      query = query.limit(filter.limit);
+    }
+
+    if (filter.offset) {
+      query = query.offset(filter.offset);
+    }
+  }
+
+  const result = await query.orderBy(customers.name).execute();
 
   return result;
 };

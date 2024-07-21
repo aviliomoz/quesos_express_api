@@ -1,11 +1,11 @@
-import { boolean, pgTable, uuid, varchar } from "drizzle-orm/pg-core";
+import { pgTable, uuid, varchar } from "drizzle-orm/pg-core";
 
 export const suppliers = pgTable("suppliers", {
   id: uuid("id").defaultRandom().primaryKey(),
   ruc: varchar("ruc").notNull(),
   name: varchar("name").notNull(),
   phone: varchar("phone"),
-  status: boolean("status").default(true).notNull(),
+  status: varchar("status").default("active").notNull(),
 });
 
 // Tipos inferidos para suppliers

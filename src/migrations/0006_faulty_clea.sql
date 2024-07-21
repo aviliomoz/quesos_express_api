@@ -1,1 +1,0 @@
-ALTER TABLE "movements" ADD COLUMN "stock" double precision NOT NULL;

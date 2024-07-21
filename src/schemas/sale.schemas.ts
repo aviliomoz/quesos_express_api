@@ -11,11 +11,9 @@ export const saleDetailSchema = z.object({
 export const saleSchema = z.object({
   customer_id: z.string().uuid(),
   date: z.date(),
-  delivery_date: z.date().optional(),
-  payment_date: z.date().optional(),
   delivered: z.boolean().default(false),
   paid: z.boolean().default(false),
   user_id: z.string().uuid(),
   status: z.boolean().default(true),
-  details: z.array(saleDetailSchema),
+  details: z.array(saleDetailSchema).default([]),
 });

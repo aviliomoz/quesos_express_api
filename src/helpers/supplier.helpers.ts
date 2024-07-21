@@ -1,6 +1,7 @@
 import { count, eq, ilike } from "drizzle-orm";
 import { db } from "../libs/drizzle";
 import { suppliers, NewSupplier } from "../models/suppliers";
+import { Status } from "../types";
 
 export const getSupplierByNameHelper = async (name: string) => {
   const result = await db
@@ -17,27 +18,54 @@ export const getSupplierByIdHelper = async (id: string) => {
   return result[0];
 };
 
-export const getSuppliersCountHelper = async (filter: { search: string }) => {
-  const result = await db
-    .select({ count: count() })
-    .from(suppliers)
-    .where(ilike(suppliers.name, `%${filter.search}%`));
+export const getSuppliersCountHelper = async (filter?: {
+  status?: Status;
+  search?: string;
+}) => {
+  let query = db.select({ count: count() }).from(suppliers).$dynamic();
+
+  const result = await query.execute();
+
+  if (filter) {
+    if (filter.status) {
+      query = query.where(eq(suppliers.status, filter.status));
+    }
+
+    if (filter.search) {
+      query = query.where(ilike(suppliers.name, `%${filter.search}%`));
+    }
+  }
 
   return result[0].count;
 };
 
-export const getSuppliersHelper = async (
-  search: string,
-  limit: number,
-  offset: number
-) => {
-  const result = await db
-    .select()
-    .from(suppliers)
-    .limit(limit)
-    .offset(offset)
-    .where(ilike(suppliers.name, `%${search}%`))
-    .orderBy(suppliers.name);
+export const getSuppliersHelper = async (filter?: {
+  status?: Status;
+  search?: string;
+  limit?: number;
+  offset?: number;
+}) => {
+  let query = db.select().from(suppliers).$dynamic();
+
+  if (filter) {
+    if (filter.status) {
+      query = query.where(eq(suppliers.status, filter.status));
+    }
+
+    if (filter.search) {
+      query = query.where(ilike(suppliers.name, `%${filter.search}%`));
+    }
+
+    if (filter.limit) {
+      query = query.limit(filter.limit);
+    }
+
+    if (filter.offset) {
+      query = query.offset(filter.offset);
+    }
+  }
+
+  const result = await query.orderBy(suppliers.name).execute();
 
   return result;
 };

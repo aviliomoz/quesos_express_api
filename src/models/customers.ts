@@ -1,4 +1,4 @@
-import { boolean, pgTable, uuid, varchar } from "drizzle-orm/pg-core";
+import { pgTable, uuid, varchar } from "drizzle-orm/pg-core";
 
 export const customers = pgTable("customers", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -6,7 +6,7 @@ export const customers = pgTable("customers", {
   name: varchar("name").notNull(),
   phone: varchar("phone"),
   address: varchar("address"),
-  status: boolean("status").default(true).notNull(),
+  status: varchar("status").default("active").notNull(),
 });
 
 export type Customer = typeof customers.$inferSelect;

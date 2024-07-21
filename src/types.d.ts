@@ -21,3 +21,5 @@ type ErrorInfo = {
   code: string;
   details: string;
 };
+
+type Status = "active" | "inactive";
