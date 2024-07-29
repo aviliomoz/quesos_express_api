@@ -5,7 +5,6 @@ export const saleDetailSchema = z.object({
   amount: z.number().min(0, "Número inválido").default(0),
   price: z.number().min(0, "Número inválido").default(0),
   discount: z.number().min(0).max(100).default(0),
-  discount_description: z.string().optional(),
 });
 
 export const saleSchema = z.object({
@@ -14,6 +13,6 @@ export const saleSchema = z.object({
   delivered: z.boolean().default(false),
   paid: z.boolean().default(false),
   user_id: z.string().uuid(),
-  status: z.boolean().default(true),
+  status: z.string().default("active"),
   details: z.array(saleDetailSchema).default([]),
 });

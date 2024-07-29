@@ -5,5 +5,5 @@ export const customerSchema = z.object({
   name: z.string().min(1, "Ingresa un nombre válido"),
   phone: z.string().optional(),
   address: z.string().optional(),
-  status: z.boolean().optional(),
+  status: z.string().optional(),
 });
