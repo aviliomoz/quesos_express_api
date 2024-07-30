@@ -11,7 +11,7 @@ import { products } from "./products";
 
 export const movements = pgTable("movements", {
   id: uuid("id").defaultRandom().primaryKey(),
-  type: varchar("type").notNull(),
+  type: varchar("type").notNull(), // entry | output
   date: timestamp("date").notNull(),
   description: varchar("description").notNull(),
   user_id: uuid("user_id")
