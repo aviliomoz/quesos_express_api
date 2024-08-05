@@ -2,19 +2,19 @@ import {
   pgTable,
   uuid,
   varchar,
-  timestamp,
   doublePrecision,
+  date,
 } from "drizzle-orm/pg-core";
-import { users } from "./users";
+import { users } from "./users.model";
 
-import { products } from "./products";
+import { products } from "./products.model";
 
 export const movements = pgTable("movements", {
   id: uuid("id").defaultRandom().primaryKey(),
   type: varchar("type").notNull(), // entry | output
-  date: timestamp("date").notNull(),
-  description: varchar("description").notNull(),
-  user_id: uuid("user_id")
+  date: date("date").notNull(),
+  description: varchar("description"),
+  userId: uuid("user_id")
     .notNull()
     .references(() => users.id),
   status: varchar("status").default("active").notNull(),
@@ -22,10 +22,10 @@ export const movements = pgTable("movements", {
 
 export const movement_details = pgTable("movement_details", {
   id: uuid("id").defaultRandom().primaryKey(),
-  product_id: uuid("product_id")
+  productId: uuid("product_id")
     .notNull()
     .references(() => products.id),
-  movement_id: uuid("movement_id")
+  movementId: uuid("movement_id")
     .notNull()
     .references(() => movements.id),
   amount: doublePrecision("amount").notNull(),

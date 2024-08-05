@@ -1,6 +1,6 @@
 import { count, eq, ilike } from "drizzle-orm";
 import { db } from "../libs/drizzle";
-import { customers, NewCustomer } from "../models/customers";
+import { customers, NewCustomer } from "../models/customers.model";
 import { Status } from "../types";
 
 export const getCustomerByNameHelper = async (name: string) => {

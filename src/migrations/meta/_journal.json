@@ -8,6 +8,20 @@
       "when": 1721954580728,
       "tag": "0000_many_doctor_strange",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1722804010818,
+      "tag": "0001_mature_blonde_phantom",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1722809794277,
+      "tag": "0002_brown_jack_power",
+      "breakpoints": true
     }
   ]
 }

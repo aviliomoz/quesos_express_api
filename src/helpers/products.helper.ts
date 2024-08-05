@@ -1,7 +1,8 @@
 import { and, count, eq, ilike } from "drizzle-orm";
 import { db } from "../libs/drizzle";
-import { NewProduct, products } from "../models/products";
+import { NewProduct, products } from "../models/products.model";
 import { Status } from "../types";
+import { getMovementDetailsByProductIdHelper } from "./movements.helper";
 
 export const getProductByNameHelper = async (name: string) => {
   const result = await db
@@ -84,4 +85,24 @@ export const updateProductHelper = async (id: string, product: NewProduct) => {
     .returning();
 
   return result[0];
+};
+
+export const getStockHelper = async (id: string) => {
+  const product = await getProductByIdHelper(id);
+  const movements = await getMovementDetailsByProductIdHelper(id);
+
+  const totalEntries = movements
+    .filter(
+      (movement) => movement.type === "entry" && movement.status === "active"
+    )
+    .reduce((total, current) => total + current.amount, 0);
+  const totalOutputs = movements
+    .filter(
+      (movement) => movement.type === "output" && movement.status === "active"
+    )
+    .reduce((total, current) => total + current.amount, 0);
+
+  const stock = product.initialStock + totalEntries - totalOutputs;
+
+  return stock;
 };

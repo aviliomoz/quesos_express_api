@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { NewProduct } from "../models/products";
+import { NewProduct } from "../models/products.model";
 import { DuplicateError, NotFoundError } from "../utils/errors";
 import {
   createProductHelper,
@@ -8,9 +8,12 @@ import {
   getProductsHelper,
   updateProductHelper,
   getProductsCountHelper,
-} from "../helpers/product.helpers";
+  getStockHelper,
+} from "../helpers/products.helper";
 import { sendErrorResponse, sendSuccessResponse } from "../utils/responses";
 import { validateStatus } from "../utils/validations";
+import { Kardex } from "../types";
+import { getMovementDetailsByProductIdHelper } from "../helpers/movements.helper";
 
 export const getProducts = async (req: Request, res: Response) => {
   const status = validateStatus(req.query.status) || undefined;
@@ -93,5 +96,50 @@ export const updateProduct = async (req: Request, res: Response) => {
     );
   } catch (error) {
     return sendErrorResponse(res, error, "Error al modificar producto");
+  }
+};
+
+export const getStock = async (req: Request, res: Response) => {
+  const { id } = req.params;
+
+  try {
+    const stock = await getStockHelper(id);
+
+    return sendSuccessResponse(res, 200, "Stock", { stock });
+  } catch (error) {
+    return sendErrorResponse(
+      res,
+      error,
+      "Error al obtener el stock del producto"
+    );
+  }
+};
+
+export const getKardex = async (req: Request, res: Response) => {
+  const { id } = req.params;
+  let kardex: Kardex = [];
+
+  try {
+    const movements = await getMovementDetailsByProductIdHelper(id);
+
+    movements.forEach((movement) => {
+      kardex.push({
+        id: movement.id,
+        date: new Date(movement.date),
+        type: movement.type,
+        product: movement.product,
+        description: movement.description || "",
+        status: movement.status,
+        entry: movement.type === "entry" ? movement.amount : "-",
+        output: movement.type === "output" ? movement.amount : "-",
+        balance: 0,
+      });
+    });
+
+    kardex = kardex.sort((a, b) => a.date.getTime() - b.date.getTime());
+
+    return sendSuccessResponse(res, 200, "Kardex", kardex);
+  } catch (error) {
+    return sendErrorResponse(res, error, "Error al cargar el kardex");
   }
 };

@@ -1,12 +1,12 @@
 import { Router } from "express";
-import { validateToken } from "../middlewares/auth.middlewares";
+import { validateToken } from "../middlewares/validations.middleware";
 import {
   createSupplier,
   getSuppliers,
   updateSupplier,
-} from "../controllers/supplier.controllers";
-import { validateSchema } from "../middlewares/validation.middlewares";
-import { supplierSchema } from "../schemas/supplier.schemas";
+} from "../controllers/suppliers.controller";
+import { validateSchema } from "../middlewares/validations.middleware";
+import { supplierSchema } from "../schemas/suppliers.schema";
 
 const router = Router();
 

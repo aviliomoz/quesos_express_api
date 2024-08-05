@@ -2,7 +2,7 @@ import express, { type Express } from "express";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import { corsConfig } from "./config/cors";
-import api from "./routes/api.routes";
+import api from "./routes/api.route";
 
 dotenv.config({ path: ".env" });
 

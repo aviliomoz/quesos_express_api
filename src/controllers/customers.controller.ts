@@ -6,9 +6,9 @@ import {
   getCustomersCountHelper,
   getCustomersHelper,
   updateCustomerHelper,
-} from "../helpers/customer.helpers";
+} from "../helpers/customers.helper";
 import { sendErrorResponse, sendSuccessResponse } from "../utils/responses";
-import { NewCustomer } from "../models/customers";
+import { NewCustomer } from "../models/customers.model";
 import { DuplicateError, NotFoundError } from "../utils/errors";
 import { validateStatus } from "../utils/validations";
 

@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
 import { TokenError } from "../utils/errors";
 import { Token, TokenVerification } from "../types";
-import { User, UserResponse } from "../models/users";
+import { User, UserResponse } from "../models/users.model";
 
 const token_expiration = 60 * 60 * 24 * 4;
 

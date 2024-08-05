@@ -1,5 +1,5 @@
 import type { Request } from "express";
-import type { UserResponse } from "./models/users";
+import type { UserResponse } from "./models/users.model";
 
 type CustomRequest = Request & {
   user: UserResponse;
@@ -23,3 +23,19 @@ type ErrorInfo = {
 };
 
 type Status = "active" | "inactive";
+
+type Kardex = {
+  id: string;
+  date: Date;
+  product: {
+    id: string;
+    name: string;
+    status: string;
+  };
+  type: string;
+  description: string;
+  status: string;
+  entry: number | "-";
+  output: number | "-";
+  balance: number;
+}[];

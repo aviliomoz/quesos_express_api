@@ -1,6 +1,6 @@
 import { count, eq, ilike } from "drizzle-orm";
 import { db } from "../libs/drizzle";
-import { suppliers, NewSupplier } from "../models/suppliers";
+import { suppliers, NewSupplier } from "../models/suppliers.model";
 import { Status } from "../types";
 
 export const getSupplierByNameHelper = async (name: string) => {

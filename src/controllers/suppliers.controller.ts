@@ -6,9 +6,9 @@ import {
   getSuppliersCountHelper,
   getSuppliersHelper,
   updateSupplierHelper,
-} from "../helpers/supplier.helpers";
+} from "../helpers/suppliers.helper";
 import { sendErrorResponse, sendSuccessResponse } from "../utils/responses";
-import { NewSupplier } from "../models/suppliers";
+import { NewSupplier } from "../models/suppliers.model";
 import { DuplicateError, NotFoundError } from "../utils/errors";
 import { validateStatus } from "../utils/validations";
 

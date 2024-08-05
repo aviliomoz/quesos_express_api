@@ -1,19 +1,20 @@
 import { Router } from "express";
-import { validateSchema } from "../middlewares/validation.middlewares";
-import { productSchema } from "../schemas/product.schemas";
+import { validateSchema } from "../middlewares/validations.middleware";
+import { productSchema } from "../schemas/products.schema";
 import {
   createProduct,
+  getKardex,
   getProductById,
   getProducts,
+  getStock,
   updateProduct,
-} from "../controllers/product.controllers";
-import { validateToken } from "../middlewares/auth.middlewares";
+} from "../controllers/products.controller";
+import { validateToken } from "../middlewares/validations.middleware";
 
 const router = Router();
 
 router.get("/", getProducts);
 router.get("/:id", getProductById);
-router.get("/kardex/:id", () => {});
 router.post("/", validateToken, validateSchema(productSchema), createProduct);
 router.put(
   "/:id",
@@ -21,5 +22,8 @@ router.put(
   validateSchema(productSchema.partial()),
   updateProduct
 );
+
+router.get("/kardex/:id", getKardex);
+router.get("/stock/:id", getStock);
 
 export default router;

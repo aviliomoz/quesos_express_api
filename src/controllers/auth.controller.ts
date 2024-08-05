@@ -2,9 +2,9 @@ import jwt from "jsonwebtoken";
 import { Request, Response } from "express";
 import { hashPassword, validatePassword } from "../utils/crypto";
 import { createToken } from "../utils/tokens";
-import { createUser, getUserByEmail } from "../helpers/auth.helpers";
+import { createUser, getUserByEmail } from "../helpers/auth.helper";
 import { AuthError } from "../utils/errors";
-import { NewUser } from "../models/users";
+import { NewUser } from "../models/users.model";
 import { Token } from "../types";
 import { sendErrorResponse, sendSuccessResponse } from "../utils/responses";
 

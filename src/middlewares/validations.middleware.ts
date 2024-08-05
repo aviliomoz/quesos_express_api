@@ -1,8 +1,26 @@
 import { Request, Response, NextFunction } from "express";
+import { ZodSchema } from "zod";
 import { CustomRequest } from "../types";
 import { verifyToken, createToken } from "../utils/tokens";
 import { TokenError } from "../utils/errors";
 import { sendErrorResponse } from "../utils/responses";
+
+export const validateSchema = (schema: ZodSchema) => {
+  return (req: Request, res: Response, next: NextFunction) => {
+    try {
+      if (Array.isArray(req.body)) {
+        // Si req.body es un array, validamos cada elemento individualmente
+        req.body.forEach((item) => schema.parse(item));
+      } else {
+        // Si req.body no es un array, validamos el objeto directamente
+        schema.parse(req.body);
+      }
+      next();
+    } catch (error) {
+      return sendErrorResponse(res, error, "Error de validación");
+    }
+  };
+};
 
 export const validateToken = async (
   req: Request,
