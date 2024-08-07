@@ -35,7 +35,7 @@ type Kardex = {
   type: string;
   description: string;
   status: string;
-  entry: number | "-";
-  output: number | "-";
+  entry: number;
+  output: number;
   balance: number;
 }[];

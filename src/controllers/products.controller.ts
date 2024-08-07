@@ -120,6 +120,7 @@ export const getKardex = async (req: Request, res: Response) => {
   let kardex: Kardex = [];
 
   try {
+    const product = await getProductByIdHelper(id);
     const movements = await getMovementDetailsByProductIdHelper(id);
 
     movements.forEach((movement) => {
@@ -130,13 +131,29 @@ export const getKardex = async (req: Request, res: Response) => {
         product: movement.product,
         description: movement.description || "",
         status: movement.status,
-        entry: movement.type === "entry" ? movement.amount : "-",
-        output: movement.type === "output" ? movement.amount : "-",
+        entry: movement.type === "entry" ? movement.amount : 0,
+        output: movement.type === "output" ? movement.amount : 0,
         balance: 0,
       });
     });
 
     kardex = kardex.sort((a, b) => a.date.getTime() - b.date.getTime());
+
+    let balance = product.initialStock;
+
+    kardex = kardex
+      .filter((record) => record.status === "active")
+      .map((record) => {
+        if (record.status === "active") {
+          if (record.type === "entry") {
+            balance += record.entry;
+          } else if (record.type === "output") {
+            balance -= record.output;
+          }
+        }
+
+        return { ...record, balance };
+      });
 
     return sendSuccessResponse(res, 200, "Kardex", kardex);
   } catch (error) {
