@@ -5,16 +5,12 @@ import {
   uuid,
   varchar,
 } from "drizzle-orm/pg-core";
-import { users } from "./users.model";
 import { suppliers } from "./suppliers.model";
 import { products } from "./products.model";
 
 export const purchases = pgTable("purchases", {
   id: uuid("id").defaultRandom().primaryKey(),
   date: date("date").notNull(),
-  userId: uuid("user_id")
-    .notNull()
-    .references(() => users.id),
   supplierId: uuid("supplier_id")
     .notNull()
     .references(() => suppliers.id),

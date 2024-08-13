@@ -53,7 +53,7 @@ export const getCustomersHelper = async (filter?: {
     }
 
     if (filter.search) {
-      query = query.where(ilike(customers.name, `%${filter.search}`));
+      query = query.where(ilike(customers.name, `%${filter.search}%`));
     }
 
     if (filter.limit) {

@@ -23,6 +23,7 @@ type ErrorInfo = {
 };
 
 type Status = "active" | "inactive";
+type SaleStatus = "pending" | "deleted" | "completed";
 
 type Kardex = {
   id: string;

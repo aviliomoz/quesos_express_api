@@ -13,7 +13,9 @@ import {
 import { sendErrorResponse, sendSuccessResponse } from "../utils/responses";
 import { validateStatus } from "../utils/validations";
 import { Kardex } from "../types";
-import { getMovementDetailsByProductIdHelper } from "../helpers/movements.helper";
+import { getMovementsByProductIdHelper } from "../helpers/movements.helper";
+import { getPurchaseDetailsByProductIdHelper } from "../helpers/purchases.helper";
+import { getSaleDetailsByProductIdHelper } from "../helpers/sales.helper";
 
 export const getProducts = async (req: Request, res: Response) => {
   const status = validateStatus(req.query.status) || undefined;
@@ -121,39 +123,71 @@ export const getKardex = async (req: Request, res: Response) => {
 
   try {
     const product = await getProductByIdHelper(id);
-    const movements = await getMovementDetailsByProductIdHelper(id);
+    const movements = await getMovementsByProductIdHelper(id);
+    const purchases = await getPurchaseDetailsByProductIdHelper(id);
+    const sales = await getSaleDetailsByProductIdHelper(id);
 
-    movements.forEach((movement) => {
-      kardex.push({
-        id: movement.id,
-        date: new Date(movement.date),
-        type: movement.type,
-        product: movement.product,
-        description: movement.description || "",
-        status: movement.status,
-        entry: movement.type === "entry" ? movement.amount : 0,
-        output: movement.type === "output" ? movement.amount : 0,
-        balance: 0,
+    movements
+      .filter((movement) => movement.status === "active")
+      .forEach((movement) => {
+        kardex.push({
+          id: movement.id,
+          date: new Date(movement.date),
+          type: movement.type,
+          product: movement.product,
+          description: movement.description || "",
+          status: movement.status,
+          entry: movement.type === "entry" ? movement.amount : 0,
+          output: movement.type === "output" ? movement.amount : 0,
+          balance: 0,
+        });
       });
-    });
+
+    purchases
+      .filter((purchase) => purchase.status === "active")
+      .forEach((purchase) => {
+        kardex.push({
+          id: purchase.id,
+          date: new Date(purchase.date),
+          type: "purchase",
+          product: purchase.product,
+          description: "",
+          status: purchase.status,
+          entry: purchase.amount,
+          output: 0,
+          balance: 0,
+        });
+      });
+
+    sales
+      .filter((sale) => sale.status !== "deleted")
+      .forEach((sale) => {
+        kardex.push({
+          id: sale.id,
+          date: new Date(sale.date),
+          type: "sale",
+          product: sale.product,
+          description: "",
+          status: sale.status,
+          entry: 0,
+          output: sale.amount,
+          balance: 0,
+        });
+      });
 
     kardex = kardex.sort((a, b) => a.date.getTime() - b.date.getTime());
 
     let balance = product.initialStock;
 
-    kardex = kardex
-      .filter((record) => record.status === "active")
-      .map((record) => {
-        if (record.status === "active") {
-          if (record.type === "entry") {
-            balance += record.entry;
-          } else if (record.type === "output") {
-            balance -= record.output;
-          }
-        }
+    kardex = kardex.map((record) => {
+      if (record.type === "entry" || record.type === "purchase") {
+        balance += record.entry;
+      } else if (record.type === "output" || record.type === "sale") {
+        balance -= record.output;
+      }
 
-        return { ...record, balance };
-      });
+      return { ...record, balance };
+    });
 
     return sendSuccessResponse(res, 200, "Kardex", kardex);
   } catch (error) {

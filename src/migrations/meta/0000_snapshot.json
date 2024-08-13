@@ -1,5 +1,5 @@
 {
-  "id": "7f6ba046-0f87-435e-a5a8-cd3fda8fdd5c",
+  "id": "fa437794-48ae-46f2-aff4-e32cc16cd250",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "6",
   "dialect": "postgresql",
@@ -52,68 +52,6 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "public.movement_details": {
-      "name": "movement_details",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
-        "product_id": {
-          "name": "product_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "movement_id": {
-          "name": "movement_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "amount": {
-          "name": "amount",
-          "type": "double precision",
-          "primaryKey": false,
-          "notNull": true
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "movement_details_product_id_products_id_fk": {
-          "name": "movement_details_product_id_products_id_fk",
-          "tableFrom": "movement_details",
-          "tableTo": "products",
-          "columnsFrom": [
-            "product_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "movement_details_movement_id_movements_id_fk": {
-          "name": "movement_details_movement_id_movements_id_fk",
-          "tableFrom": "movement_details",
-          "tableTo": "movements",
-          "columnsFrom": [
-            "movement_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
-    },
     "public.movements": {
       "name": "movements",
       "schema": "",
@@ -133,7 +71,7 @@
         },
         "date": {
           "name": "date",
-          "type": "timestamp",
+          "type": "date",
           "primaryKey": false,
           "notNull": true
         },
@@ -141,13 +79,7 @@
           "name": "description",
           "type": "varchar",
           "primaryKey": false,
-          "notNull": true
-        },
-        "user_id": {
-          "name": "user_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
+          "notNull": false
         },
         "status": {
           "name": "status",
@@ -155,16 +87,28 @@
           "primaryKey": false,
           "notNull": true,
           "default": "'active'"
+        },
+        "product_id": {
+          "name": "product_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "amount": {
+          "name": "amount",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": true
         }
       },
       "indexes": {},
       "foreignKeys": {
-        "movements_user_id_users_id_fk": {
-          "name": "movements_user_id_users_id_fk",
+        "movements_product_id_products_id_fk": {
+          "name": "movements_product_id_products_id_fk",
           "tableFrom": "movements",
-          "tableTo": "users",
+          "tableTo": "products",
           "columnsFrom": [
-            "user_id"
+            "product_id"
           ],
           "columnsTo": [
             "id"
@@ -307,13 +251,7 @@
         },
         "date": {
           "name": "date",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "user_id": {
-          "name": "user_id",
-          "type": "uuid",
+          "type": "date",
           "primaryKey": false,
           "notNull": true
         },
@@ -333,19 +271,6 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "purchases_user_id_users_id_fk": {
-          "name": "purchases_user_id_users_id_fk",
-          "tableFrom": "purchases",
-          "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
         "purchases_supplier_id_suppliers_id_fk": {
           "name": "purchases_supplier_id_suppliers_id_fk",
           "tableFrom": "purchases",
@@ -456,7 +381,7 @@
         },
         "date": {
           "name": "date",
-          "type": "timestamp",
+          "type": "date",
           "primaryKey": false,
           "notNull": true
         },
@@ -474,12 +399,6 @@
           "notNull": true,
           "default": false
         },
-        "user_id": {
-          "name": "user_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
         "status": {
           "name": "status",
           "type": "varchar",
@@ -496,19 +415,6 @@
           "tableTo": "customers",
           "columnsFrom": [
             "customer_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "sales_user_id_users_id_fk": {
-          "name": "sales_user_id_users_id_fk",
-          "tableFrom": "sales",
-          "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
           ],
           "columnsTo": [
             "id"

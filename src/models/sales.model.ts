@@ -7,7 +7,6 @@ import {
   doublePrecision,
 } from "drizzle-orm/pg-core";
 import { customers } from "./customers.model";
-import { users } from "./users.model";
 import { products } from "./products.model";
 
 export const sales = pgTable("sales", {
@@ -18,9 +17,6 @@ export const sales = pgTable("sales", {
   date: date("date").notNull(),
   delivered: boolean("delivered").notNull().default(false),
   paid: boolean("paid").notNull().default(false),
-  userId: uuid("user_id")
-    .notNull()
-    .references(() => users.id),
   status: varchar("status").default("active").notNull(),
 });
 
@@ -34,7 +30,7 @@ export const sale_details = pgTable("sale_details", {
     .references(() => products.id),
   amount: doublePrecision("amount").notNull(),
   price: doublePrecision("price").notNull(),
-  discount: doublePrecision("discount"),
+  discount: doublePrecision("discount").notNull(),
 });
 
 export type Sale = typeof sales.$inferSelect;
