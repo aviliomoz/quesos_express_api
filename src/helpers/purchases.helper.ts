@@ -188,14 +188,4 @@ export const updatePurchaseDetailsByPurchaseIdHelper = async (
   return result;
 };
 
-export const getPurchaseTotal = async (purchaseId: string) => {
-  const details = await getPurchaseDetailsByPurchaseIdHelper(purchaseId);
 
-  const total = details.reduce(
-    (total, current) =>
-      total + (current.amount * current.price - current.discount),
-    0
-  );
-
-  return total;
-};
